@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TestPlanState",
+  "description": "Расширение agent-state-schema.json для тестовых планов gigatest. Используется совместно с agent-state-schema.json.",
+  "type": "object",
+  "required": ["version", "agent", "project", "session", "plan", "memory", "test_plan"],
+  "properties": {
+    "test_plan": {
+      "type": "object",
+      "description": "Тестово-специфичные метаданные плана",
+      "required": ["target_stack", "test_framework"],
+      "properties": {
+        "target_stack": {
+          "type": "string",
+          "description": "Целевой стек проекта",
+          "enum": ["react", "java", "js-ts", "multi-stack"]
+        },
+        "test_framework": {
+          "type": "string",
+          "description": "Используемый тестовый фреймворк",
+          "enum": ["jest", "vitest", "junit", "testng", "pytest", "mocha", "unknown"]
+        },
+        "context_overlay": {
+          "type": "string",
+          "description": "Какой testing overlay используется",
+          "enum": ["react-testing.md", "java-testing.md", "js-ts-testing.md", ""]
+        },
+        "coverage_tool": {
+          "type": "string",
+          "description": "Инструмент измерения покрытия (например, jest --coverage, jacoco)"
+        },
+        "audit_summary": {
+          "type": "object",
+          "properties": {
+            "total_targets": {"type": "integer"},
+            "full_coverage": {"type": "integer"},
+            "partial_coverage": {"type": "integer"},
+            "invalid_coverage": {"type": "integer"},
+            "no_coverage": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "test_type": {
+                "type": "string",
+                "enum": ["ui_test", "unit_test", "integration_test", "hook_test"]
+              },
+              "coverage_status": {
+                "type": "string",
+                "enum": ["full", "partial", "invalid", "missing"]
+              },
+              "quality_gate": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "test_file": {
+                "type": "string",
+                "description": "Путь к тестовому файлу (если существует)"
+              },
+              "source_file": {
+                "type": "string",
+                "description": "Путь к исходному файлу (компонент, сервис, хук)"
+              },
+              "mocking_required": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Зависимости, которые нужно мокать"
+              }
+            }
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "object",
+          "properties": {
+            "testing_decisions": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Записи принятых решений по тестам (мокирование, стратегии, edge cases)"
+            },
+            "test_patterns": {
+              "type": "object",
+              "properties": {
+                "render_helper": {"type": "string"},
+                "factory_state": {"type": "string"},
+                "mock_setup": {"type": "string"}
+              },
+              "description": "Переиспользуемые паттерны тестирования в проекте"
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,9 @@
+{
+  "name": "gigatest",
+  "version": "0.1.0",
+  "description": "Structured testing workflow extension for Qwen Code. Iterative test audit, implementation, review, and verification for UI and backend stacks.",
+  "contextFileName": "QWEN.md",
+  "commands": "commands",
+  "skills": "skills",
+  "agents": "agents"
+}

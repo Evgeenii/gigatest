@@ -1,0 +1,268 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentState",
+  "description": "Универсальная структура состояния автономного суб-агента для gigatest workflow (v2.4)",
+  "type": "object",
+  "required": ["version", "agent", "project", "session", "plan", "memory"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Версия формата состояния (например, '2.4')",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "agent": {
+      "type": "object",
+      "description": "Идентификация текущего агента",
+      "required": ["type", "role", "instance_id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Тип агента",
+          "enum": ["test-auditor", "test-implementer", "test-reviewer", "test-strategist", "test-verifier", "architect", "code-reviewer"]
+        },
+        "role": {
+          "type": "string",
+          "description": "Человекочитаемое название роли"
+        },
+        "instance_id": {
+          "type": "string",
+          "description": "Уникальный идентификатор экземпляра агента"
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "description": "Информация о проекте",
+      "required": ["name", "root_path"],
+      "properties": {
+        "name": {"type": "string"},
+        "root_path": {"type": "string", "description": "Абсолютный путь к корню репозитория"}
+      }
+    },
+    "mcp_servers": {
+      "type": "array",
+      "description": "Список доступных MCP-серверов (например, ['code-index'])",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "session": {
+      "type": "object",
+      "description": "Текущая сессия работы агента",
+      "required": ["id", "started_at", "last_updated", "status", "mode", "checkpoint"],
+      "properties": {
+        "id": {"type": "string"},
+        "started_at": {"type": "string", "format": "date-time"},
+        "last_updated": {"type": "string", "format": "date-time"},
+        "status": {
+          "type": "string",
+          "enum": ["active", "paused", "completed", "blocked"]
+        },
+        "mode": {
+          "type": "string",
+          "description": "Режим работы сессии",
+          "enum": ["audit", "implementation", "review", "verification", "strategy", "refactor", "maintenance", "research"]
+        },
+        "checkpoint": {
+          "type": "object",
+          "required": ["iteration", "plan_item_id", "description"],
+          "properties": {
+            "iteration": {"type": "integer", "minimum": 1},
+            "plan_item_id": {"type": ["string", "null"]},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "plan": {
+      "type": "object",
+      "required": ["items", "meta"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "name", "assigned_agent", "status", "priority", "dependencies", "files"],
+            "properties": {
+              "id": {"type": "string"},
+              "type": {
+                "type": "string",
+                "enum": ["design", "implementation", "test", "review", "analysis", "refactor", "config", "docs", "migration", "deployment", "research"]
+              },
+              "subtype": {
+                "type": "string",
+                "enum": ["ui_test", "unit_test", "integration_test", "hook_test", "audit", "strategy", ""]
+              },
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "assigned_agent": {"type": "string"},
+              "status": {
+                "type": "string",
+                "enum": ["pending", "in_progress", "done", "skipped", "blocked"]
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"]
+              },
+              "complexity": {
+                "type": "string",
+                "enum": ["low", "medium", "high"]
+              },
+              "estimated_effort": {
+                "type": "string",
+                "enum": ["XS", "S", "M", "L", "XL"]
+              },
+              "risk_level": {
+                "type": "string",
+                "enum": ["low", "medium", "high"]
+              },
+              "tags": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "dependencies": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "context_ref": {
+                "type": "string",
+                "description": "Ссылка на контекст (например, 'ctx:api_errors:v2')"
+              },
+              "files": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "target": {
+                "type": "string",
+                "description": "Произвольный идентификатор цели (файл, функция, API endpoint, компонент и т.д.)"
+              },
+              "coverage_status": {
+                "type": "string",
+                "enum": ["full", "partial", "invalid", "missing"],
+                "description": "Статус покрытия теста (для тестовых задач)"
+              },
+              "quality_gate": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "Список требований к качеству теста, которые необходимо выполнить"
+              },
+              "artifact": {
+                "type": "string",
+                "description": "Ожидаемый результат (путь к файлу, имя функции и т.п.)"
+              },
+              "created_at": {"type": "string", "format": "date-time"},
+              "started_at": {"type": ["string", "null"], "format": "date-time"},
+              "completed_at": {"type": ["string", "null"], "format": "date-time"},
+              "result": {
+                "type": ["object", "null"],
+                "properties": {
+                  "status": {"type": "string", "enum": ["success", "failure", "partial"]},
+                  "message": {"type": "string"}
+                },
+                "required": ["status", "message"]
+              },
+              "review_required": {"type": "boolean"},
+              "review_status": {
+                "type": ["string", "null"],
+                "enum": ["pending", "approved", "changes_requested"]
+              },
+              "reviewed_by": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "meta": {
+          "type": "object",
+          "required": ["total_items", "done", "in_progress", "pending", "blocked", "skipped", "progress_percent"],
+          "properties": {
+            "total_items": {"type": "integer"},
+            "done": {"type": "integer"},
+            "in_progress": {"type": "integer"},
+            "pending": {"type": "integer"},
+            "blocked": {"type": "integer"},
+            "skipped": {"type": "integer"},
+            "progress_percent": {"type": "number", "minimum": 0, "maximum": 100}
+          }
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "required": ["artifacts", "context", "history"],
+      "properties": {
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type", "path", "created_at", "description"],
+            "properties": {
+              "id": {"type": "string"},
+              "type": {"type": "string"},
+              "path": {"type": "string"},
+              "created_at": {"type": "string", "format": "date-time"},
+              "description": {"type": "string"},
+              "related_plan_item": {"type": "string"}
+            }
+          }
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "last_error": {
+              "type": ["object", "null"],
+              "properties": {
+                "code": {"type": "string"},
+                "message": {"type": "string"},
+                "timestamp": {"type": "string", "format": "date-time"},
+                "resolved": {"type": "boolean"}
+              }
+            },
+            "rules": {
+              "type": "object",
+              "properties": {
+                "version": {"type": "string"},
+                "content": {"type": "object"},
+                "updated_at": {"type": "string", "format": "date-time"}
+              }
+            },
+            "knowledge": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Список фактов, известных агенту о проекте"
+            },
+            "constraints": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "Ограничения, которые необходимо соблюдать"
+            },
+            "references": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file": {"type": "string"},
+                  "checksum": {"type": "string"},
+                  "last_checked": {"type": "string", "format": "date-time"}
+                }
+              }
+            }
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["iteration", "plan_item_id", "action", "timestamp"],
+            "properties": {
+              "iteration": {"type": "integer"},
+              "plan_item_id": {"type": "string"},
+              "action": {"type": "string", "enum": ["started", "completed", "failed", "skipped"]},
+              "timestamp": {"type": "string", "format": "date-time"},
+              "details": {"type": "string"},
+              "result": {"type": "string", "enum": ["success", "failure"]}
+            }
+          }
+        }
+      }
+    }
+  }
+}
