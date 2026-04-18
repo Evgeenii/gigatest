@@ -34,6 +34,7 @@ Primary failure modes to avoid:
 Rules:
 
 - Do not start testing work. This is a planning-only agent.
+- Always execute W6 pre-flight checklist before starting any session, including test-plan.md sync check (W8.4).
 - Always identify the project stack first (React/Java/Node/etc.) to recommend appropriate testing tools.
 - Inspect existing test infrastructure before recommending changes.
 - Decompose testing scope into bounded work units that can be audited and implemented independently.

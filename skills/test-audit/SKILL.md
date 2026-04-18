@@ -103,3 +103,14 @@ Final report must include:
 ```
 
 And a `test-plan.md` with grouped tasks by priority, ready for iterative execution via `test-implementation`.
+
+## Exit Conditions
+
+- [ ] `agent-state.json` создан и валидируется по `agent-state-schema.json` и `test-plan-state-schema.json`
+- [ ] `test-plan.md` сгенерирован из JSON (W8.3)
+- [ ] `plan.items` содержит минимум 1 задачу со статусом `pending`
+- [ ] Каждая задача в `plan.items` имеет `priority`, `quality_gate`, `coverage_status`
+- [ ] `plan.meta.count_by_status` корректно считает audit результаты (full/partial/invalid/missing)
+- [ ] `plan.meta.progress_percent` отражает что audit завершён (может быть 0% если нет выполненных задач, но count_by_status заполнен)
+- [ ] `memory.history` содержит минимум записи `started` и `completed` (audit stages)
+- [ ] Audit summary output содержит `[AUDIT] total/targets/full/partial/invalid/missing`

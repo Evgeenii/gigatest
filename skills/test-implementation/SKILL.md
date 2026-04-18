@@ -53,3 +53,13 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 [AGENT] checkpoint saved
 [AGENT] test-plan.md updated
 ```
+
+## Exit Conditions
+
+- [ ] Одна задача выполнена за текущую итерацию (не более)
+- [ ] `agent-state.json` обновлён: задача помечена `done`, `completed_at` установлен, артефакты в `memory.artifacts`
+- [ ] `test-plan.md` регенерирован из JSON (W8.3)
+- [ ] Тест запущен и прошёл (или задокументировано что не прошёл с причинами)
+- [ ] Iteration log format выведен в output (W5.1)
+- [ ] `coverage_status` и `quality_gate` заполнены для текущей задачи в `agent-state.json`
+- [ ] `memory.history` содержит `completed` запись

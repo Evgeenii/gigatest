@@ -37,3 +37,11 @@ Your job at the start of testing work is to route into the correct workflow stag
 - If the user asks to "run the tests" or "check if tests pass" → `test-verification`
 - If the next stage is ambiguous, ask one narrow clarifying question.
 - If automatic routing is not enough, tell the user which slash command is the manual fallback.
+
+## Exit Conditions
+
+- [ ] Output содержит явную строку вида `[ROUTING] selected skill: <skill-name>`
+- [ ] Output содержит обоснование: `[ROUTING] reason: <обоснование выбора>`
+- [ ] Вызван релевантный skill через `@./skills/test-audit/SKILL.md`, `test-implementation`, `test-review`, или `test-verification`
+- [ ] Если plan не существует — output содержит `[ROUTING] first step: audit (no plan found)`
+- [ ] Если plan уже существует — output содержит `[ROUTING] plan found at: <path>, proceeding to implementation`

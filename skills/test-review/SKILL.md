@@ -82,3 +82,12 @@ Flag if found in tests:
 - If a test uses a valid but unusual pattern, explain why it works rather than suggesting a change.
 - For tests being reviewed after `test-implementation`, check that they match the `quality_gate` requirements from the audit plan in `agent-state.json`.
 - After review, provide a summary and wait for user feedback before proceeding.
+
+## Exit Conditions
+
+- [ ] Все файлы из `agent-state.json::memory.artifacts` (или scope) прошли review
+- [ ] Phase 3 Findings Report сформирован для каждого файла с `issues_found`
+- [ ] Phase 4 Summary (`[REVIEW] total_files_reviewed/files_passing/files_with_findings/total_findings`) выведен
+- [ ] Если есть critical findings — явно помечены и требуют подтверждения пользователя
+- [ ] `agent-state.json` обновлён с результатами review (artifacts, history запись `completed`)
+- [ ] `memory.history` содержит записи `started` и `completed` (review stage)

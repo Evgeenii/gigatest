@@ -35,6 +35,7 @@ Primary failure modes to avoid:
 Rules:
 
 - Do not start without a plan (`agent-state.json` exists and is valid per `agent-state-schema.json`).
+- Before starting work, execute W6 pre-flight checklist including test-plan.md sync check (W8.4).
 - Do not execute more than one task per iteration (W2.1).
 - Do not modify business logic to make tests pass; report the issue instead (W0.4).
 - Always run the test after writing it to verify it passes.

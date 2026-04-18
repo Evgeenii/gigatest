@@ -64,3 +64,14 @@ Before any success claim:
 - Missing verification means incomplete work, not implied success.
 - For delegated work, verify independently before reporting status upward.
 - Check `test-plan.md` sync status — if out of sync with `agent-state.json`, regenerate it (W8.3).
+
+## Exit Conditions
+
+- [ ] `agent-state.json` загружен и проверен: все `plan.items` имеют статус `done` или `skipped`
+- [ ] `plan.meta.progress_percent == 100` подтверждено
+- [ ] Test command запущен и результат прочитан (не предполагается)
+- [ ] Evidence по каждому claim собрано и задокументировано (Evidence By Claim таблица)
+- [ ] Если verification прошло успешно — output содержит exact command + key result
+- [ ] Если verification failed — failure reported plainly, no completion claimed
+- [ ] `test-plan.md` синхронизирован с `agent-state.json` (W8.3)
+- [ ] `memory.history` содержит записи `started` и `completed` (verification stage)
