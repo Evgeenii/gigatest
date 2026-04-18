@@ -114,3 +114,13 @@ And a `test-plan.md` with grouped tasks by priority, ready for iterative executi
 - [ ] `plan.meta.progress_percent` отражает что audit завершён (может быть 0% если нет выполненных задач, но count_by_status заполнен)
 - [ ] `memory.history` содержит минимум записи `started` и `completed` (audit stages)
 - [ ] Audit summary output содержит `[AUDIT] total/targets/full/partial/invalid/missing`
+
+## Forbidden Patterns
+
+| Паттерн | Почему |
+|---------|--------|
+| Модификация кода во время аудита | Audit — read-only фаза, изменение кода нарушает целостность анализа |
+| Присвоение `partial` только по наличию тест-файла | Файл существует ≠ качество, нужна проверка по quality checklist |
+| Пропуск `missing_requirements` | Пользователь не узнает что именно нужно добавить |
+| Создание `agent-state.json` без `quality_gate` для каждой задачи | Plan.items без quality_gate бесполезен для имплементации |
+| Абсолютные пути в артефактах | Не portable, ломается при перемещении проекта |

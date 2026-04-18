@@ -63,3 +63,13 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 - [ ] Iteration log format выведен в output (W5.1)
 - [ ] `coverage_status` и `quality_gate` заполнены для текущей задачи в `agent-state.json`
 - [ ] `memory.history` содержит `completed` запись
+
+## Forbidden Patterns
+
+| Паттерн | Почему |
+|---------|--------|
+| Пакетное выполнение нескольких задач за итерацию | Нарушает W2.1 (one task per iteration), теряется гранулярность state |
+| Модификация бизнес-логики для прохождения тестов | Маскирует баг, нарушает W0.4 |
+| Написание тестов без загрузки overlay-стратегии | Нет стек-специфичных паттернов → низкое качество тестов |
+| Пропуск запуска теста после написания | Нельзя claiming pass без evidence |
+| Обновление `agent-state.json` без регенерации `test-plan.md` | Рассинхронизация human-readable и machine-readable |

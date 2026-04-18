@@ -88,7 +88,7 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["id", "type", "name", "assigned_agent", "status", "priority", "dependencies", "files"],
+            "required": ["id", "type", "name", "assigned_agent", "status", "priority", "dependencies", "files", "coverage_status", "quality_gate"],
             "properties": {
               "id": {"type": "string"},
               "type": {

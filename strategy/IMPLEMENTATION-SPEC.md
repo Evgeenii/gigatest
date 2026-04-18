@@ -14,7 +14,7 @@
 > - [`VISION.md`](VISION.md) — ЧТО и ЗАЧЕМ
 > - [`backlog.yaml`](backlog.yaml) — КАКИЕ задачи
 > - [`BLOCK-2-GIGATEST-GROWTH.md`](BLOCK-2-GIGATEST-GROWTH.md) — КОГДА
-> - [`GIGATEST-IMPROVEMENTS-ANALYSIS.md`](GIGATEST-IMPROVEMENTS-ANALYSIS.md) — ПОЧЕМУ
+> - [`GIGATEST-IMPROVEMENTS-ANALYSIS.md`](archive/ARCHIVE-GIGATEST-IMPROVEMENTS-ANALYSIS.md) — ПОЧЕМУ
 
 ---
 
@@ -155,7 +155,8 @@ gigatest-0.1.0/
 │   ├── ONBOARDING.md          ← Phase 1
 │   ├── DEMO.md                ← Phase 4
 │   ├── COMPARISON.md          ← Phase 4
-│   └── METRICS.md             ← Phase 4
+│   ├── METRICS.md             ← Phase 4
+│   └── TEMPLATE-SYNTAX.md     ← Спецификация Handlebars-like синтаксиса шаблонов
 │
 ├── strategy/                  ← Стратегические документы
 │   ├── README.md

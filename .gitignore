@@ -1,2 +1,8 @@
 # Dependency directories
 node_modules/
+
+# GigaTest session artifacts
+.gigacode/
+
+# Temporary files
+*.tmp

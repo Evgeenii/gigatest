@@ -1,5 +1,7 @@
 # JS/TS Testing Overlay
 
+> Версия: 1.0 | Дата: 2026-04-18
+
 Stack: Node.js + TypeScript (Express, NestJS, Fastify, vanilla)
 
 Use this overlay when the project uses JavaScript/TypeScript on сервере. Load it alongside `testing-standards.md`.

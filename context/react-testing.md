@@ -1,5 +1,7 @@
 # React Testing Overlay
 
+> Версия: 1.0 | Дата: 2026-04-18
+
 Stack: React + React Testing Library + Jest/Vitest
 
 Use this overlay when the project uses React. Load it alongside `testing-standards.md`.

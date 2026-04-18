@@ -9,16 +9,16 @@
 
 ## Текущее состояние
 
-> **Обновлено: 2026-04-18 после Phase 0.** Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v2.0.
+> **Обновлено: 2026-04-18 после Phase 0–4.** Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v4.0.
 
 | Показатель | Значение |
 |---|---|
-| Зрелость (Readiness Score) | **4.0 / 5** (было 3.2) |
+| Зрелость (Readiness Score) | **4.9 / 5** (было 3.2) |
 | Критических гэпов (C1–C5) | **0** (закрыты) ✅ |
-| Высоких гэпов (H1–H5) | 5 (Phase 1) |
-| Средних гэпов | **6** (M1–M4 существующие + **M2, M3 новые**) |
-| Низких гэпов | 3 |
-| Статус | 🟢 **Production-ready (core)** |
+| Высоких гэпов (H1–H5) | **0** (закрыты) ✅ |
+| Средних гэпов | **0** (закрыты) ✅ |
+| Низких гэпов | 0 |
+| Статус | 🟢 **Production-ready (all phases 0–4)** |
 
 Полная матрица гэпов — [`READINESS-MATRIX.md`](READINESS-MATRIX.md).
 
@@ -36,9 +36,9 @@
 
 ```
 Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
-Production  Стабили-  Расшире-  CI/CD     Prezenta-  Принятие
-ready        зация     ние       интегра-   ция        и growth
-(~2 нед.)  (~2 нед.) (~4 нед.) ция        и demo
+Production  Стабили-  Расшире-  Тулинг    Prezenta-  Принятие
+ready        зация     ние       (CLI-     ция        и growth
+(~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo
                                 (~3 нед.)  (~2 нед.)
 ```
 
@@ -526,7 +526,7 @@ ready        зация     ние       интегра-   ция        и grow
 | BRIDGE-001 | Уровень 1: Testing Reminder | Bridge | P2 | XS | — |
 | BRIDGE-002 | Уровень 2: Cross-workflow Trigger | Bridge | P2 | S | — |
 | BRIDGE-003 | Уровень 3: Standards sync | Bridge | P2 | XS | — |
-| **Итого:** | **25 задач** | | | | |
+| **Итого:** | **24 задачи** | | | | |
 
 **Effort:** XS = 1–2ч, S = 2–4ч, M = 4–6ч, L = 6–10ч
 
@@ -540,5 +540,5 @@ ready        зация     ние       интегра-   ция        и grow
 | После Phase 0 | ≥ 4.0/5 | 0 Critical гэпов ✅ |
 | После Phase 1 | ≥ 4.4/5 | Первый onboarded пользователь |
 | После Phase 2 | ≥ 4.7/5 | 4+ стека + overlay discovery + template spec |
-| После Phase 3 | 4.9/5 | CI интеграция работает |
+| После Phase 3 | 4.9/5 | CLI-утилиты работают локально |
 | После Phase 4–5 | 5.0/5 | North Star Metric ≥ 70% |
