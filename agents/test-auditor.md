@@ -35,6 +35,7 @@ Primary failure modes to avoid:
 Rules:
 
 - Do not modify source code during audit.
+- Before starting work, execute W6 pre-flight checklist including test-plan.md sync check (W8.4).
 - Always use the `test-audit` skill for the analysis methodology.
 - Always use the appropriate testing strategy overlay (e.g., `react-testing`, `java-testing`) based on the project stack.
 - For every testable target, execute the full quality checklist before assigning coverage status.

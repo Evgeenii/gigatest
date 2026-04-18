@@ -218,6 +218,7 @@ description: Core principles of planning, iterability, and state management for 
 Перед стартом агент ОБЯЗАН:
 
 - [ ] Найти или создать директорию `.gigacode/plans/<task-type>-YYYY-MM-DD/` для артефактов.
+- [ ] **Если файл `agent-state.json` существует — валидировать его по `agent-state-schema.json`.** Если валидация не прошла — **агент выводит ошибку `[AGENT] PRE-FLIGHT FAILED: agent-state.json is invalid` и останавливается** (blocked state).
 - [ ] Если файл `agent-state.json` новый – инициализировать его согласно W1.3 и запросить у пользователя подтверждение `mode`.
 - [ ] **Проверить наличие `test-plan.md`. Если отсутствует – создать из текущего состояния (W8.1).**
 - [ ] Проверить, что `session.status` позволяет работу (`active` или `paused`).
@@ -323,9 +324,29 @@ description: Core principles of planning, iterability, and state management for 
 
 После **каждого** сохранения `agent-state.json` агент должен перегенерировать `test-plan.md` полностью на основе актуального JSON-содержимого.
 
-### W8.4 Синхронизация при конфликтах
+### W8.4 Синхронизация при конфликтах (алгоритм регенерации)
 
-Если `test-plan.md` отсутствует или не соответствует `agent-state.json`, агент пересоздаёт файл из JSON с предупреждением:
+Если `test-plan.md` отсутствует или не соответствует `agent-state.json`, агент выполняет следующий алгоритм:
+
+**Pre-flight sync check (выполняется каждым агентом перед началом работы):**
+
+1. Загрузить `agent-state.json` и проверить `session.last_updated`.
+2. Проверить, существует ли `test-plan.md` в той же директории.
+3. Если `test-plan.md` **отсутствует** → перейти к шагу 5.
+4. Если `test-plan.md` **существует** — сравнить его `mtime` (время модификации файла) с `session.last_updated` из JSON:
+   - Если `test-plan.md.mtime < agent-state.json.session.last_updated` → Markdown устарел, нужен регенерация.
+   - Если `test-plan.md.mtime >= agent-state.json.session.last_updated` → файлы синхронизированы, продолжить работу.
+5. Перегенерировать `test-plan.md` из `agent-state.json` по шаблону W8.1.
+6. Вывести предупреждение:
+   ```
+   [AGENT] WARNING: test-plan.md was out of sync (or missing). Regenerated from agent-state.json.
+   ```
+7. Продолжить работу.
+
+**Когда регенерировать:**
+- При каждом старте новой сессии (pre-flight check в W6).
+- После каждого изменения `agent-state.json` (W8.3).
+- После любой операции, которая изменила plan (выбор задачи, завершение, блокировка).
 
 ```
 [AGENT] WARNING: test-plan.md was out of sync. Regenerated from agent-state.json.
@@ -372,6 +393,100 @@ description: Core principles of planning, iterability, and state management for 
   "related_plan_item": "UI-001"
 }
 ```
+
+---
+
+## W10. State Discovery Protocol
+
+### W10.1 Назначение
+
+State Discovery — это процесс автоконфигурации агента при первом подключении к проекту.
+Агент определяет состояние проекта, доступные skills, контекст и формирует начальный план.
+
+### W10.1 Discovery Steps
+
+При старте сессии агент выполняет следующий протокол:
+
+```
+1. Scan: Найти root project directory
+2. Detect: Определить tech stack (см. W10.2)
+3. Load: Загрузить релевантный context overlay (context/<stack>-testing.md)
+4. Check: Найти .gigacode/plans/ — есть ли существующие планы?
+   ├─ ДА → Загрузить последний agent-state.json, определить текущий checkpoint
+   └─ НЕТ → Перейти к шагу 5
+5. Audit: Если планов нет — выполнить начальный аудит (test-audit)
+6. Plan: Создать .gigacode/plans/<task-type>-YYYY-MM-DD/ с agent-state.json + test-plan.md
+```
+
+### W10.2 Stack Detection Algorithm
+
+Агент определяет стек по наличию ключевых файлов:
+
+| Файл/Паттерн | Stack | Context Overlay |
+|-------------|-------|-----------------|
+| `package.json` + `react` в зависимостях | React | `react-testing.md` |
+| `package.json` без `react` | JS/TS | `js-ts-testing.md` |
+| `go.mod` или `*.go` файлы | Go | `go-testing.md` |
+| `requirements.txt` или `pyproject.toml` или `poetry.lock` | Python | `python-testing.md` |
+| `pom.xml` или `build.gradle` или `*.java` | Java | `java-testing.md` |
+| `Cargo.toml` или `*.rs` | Rust | (future) |
+| `Gemfile` или `*.rb` | Ruby | (future) |
+
+**Результат:** Stack detection записывается в `memory.context.knowledge`:
+```json
+"knowledge": [
+  "Detected stack: React + TypeScript (package.json, react, jest, @testing-library/react)"
+]
+```
+
+### W10.3 Skill Discovery
+
+Агент сканирует доступные skills:
+
+1. Найти `skills/` директорию в extension
+2. Для каждого `skills/<name>/SKILL.md`:
+   - Прочитать front-matter (`name`, `description`)
+   - Записать в `memory.context.knowledge` как доступный скилл
+3. Если нужен специфичный skill и его нет — сообщить пользователю
+
+### W10.4 Context Initialization
+
+После stack detection:
+
+1. Загрузить `context/testing-standards.md` (shared, всегда)
+2. Загрузить `context/<stack>-testing.md` (специфичный оверлей)
+3. Записать в `memory.context.knowledge`:
+   ```json
+   "knowledge": [
+     "Loaded context: testing-standards.md, react-testing.md",
+     "Stack: React + TypeScript"
+   ]
+   ```
+
+### W10.5 Plan Resumption
+
+Если сессия возобновляется (не первый запуск):
+
+1. Найти последний `.gigacode/plans/<task-type>-*/` по дате модификации
+2. Загрузить `agent-state.json`
+3. Проверить валидацию по схеме
+4. Проверить checkpoint:
+   - Если `checkpoint.plan_item_id != null` — есть незавершённая задача
+   - Если `session.status == 'paused'` — сессия была приостановлена
+5. Синхронизировать `test-plan.md` (W8.4)
+6. Продолжить с checkpoint или выбрать следующую pending задачу (W1.4)
+
+**Правило:** Если `agent-state.json` invalid -- не продолжать, сообщить об ошибке.
+
+## Exit Conditions
+
+- [ ] `agent-state.json` сохранён и валидируется по `agent-state-schema.json`
+- [ ] `test-plan.md` синхронизирован с JSON (`mtime >= session.last_updated`)
+- [ ] Итерация логирована в формате W5.1 (output содержит `[AGENT]` строки с iteration/selected/result)
+- [ ] `memory.history` содержит минимум одну запись с `action: "completed"` за текущую итерацию
+- [ ] Текущая задача (`checkpoint.plan_item_id` или выбранная pending) имеет `status` = `done` или `blocked` с заполненным `completed_at`
+- [ ] `session.last_updated` обновлён и содержит актуальный timestamp
+- [ ] Выбран следующий шаг: next pending задача ИЛИ остановка (если все задачи done/skipped)
 
 ---
 

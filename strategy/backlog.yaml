@@ -1,0 +1,603 @@
+# backlog.yaml — Machine-readable бэклог GigaTest
+# Версия: 2.0 | Дата: 2026-04-18
+# Source of truth для статусов задач.
+# Human-readable версия: BLOCK-2-GIGATEST-GROWTH.md
+# Maturity matrix: READINESS-MATRIX.md
+
+meta:
+  version: "3.0"
+  updated: "2026-04-18T16:00:00Z"
+  total_items: 25
+  readiness_score: "5.0/5"
+  north_star: "≥70% автономных сессий без эскалации к человеку"
+
+# ─────────────────────────────────────────────
+# PHASE 0 — PRODUCTION READY
+# Exit condition: все C1–C5 гэпы закрыты, e2e тест проходит
+# ─────────────────────────────────────────────
+
+phase-0:
+  name: "Production Ready"
+  goal: "Устранить все критические гэпы C1–C5"
+  exit_metric: "Readiness Score ≥ 4.0/5"
+  items:
+
+    - id: P0-001
+      title: "Создать skills/test-plan-template/SKILL.md"
+      gap: C1
+      priority: P0
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: skills/test-plan-template/SKILL.md
+      action: >
+        Создать файл SKILL.md в директории skills/test-plan-template/.
+        Файл должен содержать front-matter (name, description) и включать
+        или импортировать содержимое test-plan-template.md.
+      acceptance:
+        - "Файл skills/test-plan-template/SKILL.md существует"
+        - "Содержит валидный front-matter с name и description"
+        - "Агент test-auditor может загрузить шаблон через @./skills/test-plan-template/SKILL.md"
+        - "Генерируемый test-plan.md соответствует шаблону"
+      depends_on: []
+      estimated_effort: XS
+      tags: [skills, template, critical]
+
+    - id: P0-002
+      title: "Добавить $ref composition между agent-state-schema.json и test-plan-state-schema.json"
+      gap: C2
+      priority: P0
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: skills/agent-workflow-core/test-plan-state-schema.json
+      action: >
+        Определить общие поля между agent-state-schema.json и test-plan-state-schema.json.
+        Добавить $ref в test-plan-state-schema.json на agent-state-schema.json для общих полей.
+        Удалить дублирование. Проверить plans/tests-audit-example/agent-state.json.
+      acceptance:
+        - "test-plan-state-schema.json содержит $ref на agent-state-schema.json"
+        - "Дублирующиеся поля удалены из test-plan-state-schema.json"
+        - "plans/tests-audit-example/agent-state.json валидируется по обеим схемам"
+        - "Нет дублирования определений типов"
+      depends_on: []
+      estimated_effort: S
+      tags: [schema, json-schema, critical]
+
+    - id: P0-003
+      title: "Включить additionalProperties: false в test-plan-state-schema.json"
+      gap: C3
+      priority: P0
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: skills/agent-workflow-core/test-plan-state-schema.json
+      action: >
+        Установить additionalProperties: false на корне schema и на всех вложенных объектах.
+        Проверить что plans/tests-audit-example/agent-state.json проходит валидацию.
+        Исправить если нужно.
+      acceptance:
+        - "additionalProperties: false на корне и всех вложенных объектах"
+        - "plans/tests-audit-example/agent-state.json валидируется без ошибок"
+        - "JSON с лишними полями выдаёт ошибку валидации"
+      depends_on: [P0-002]
+      estimated_effort: S
+      tags: [schema, json-schema, validation, critical]
+
+    - id: P0-004
+      title: "Синхронизировать agent.type enum с реальными именами агентов"
+      gap: C4
+      priority: P0
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: skills/agent-workflow-core/agent-state-schema.json
+      action: >
+        Прочитать все файлы в agents/ и выписать реальные name из front-matter.
+        Обновить enum agent.type в agent-state-schema.json:
+        test-auditor, test-implementer, test-reviewer, test-strategist.
+        Убрать test-verifier пока agents/test-verifier.md не создан.
+        Проверить все места где используется agent.type.
+      acceptance:
+        - "Enum содержит: test-auditor, test-implementer, test-reviewer, test-strategist"
+        - "plans/tests-audit-example/agent-state.json использует валидное значение из enum"
+        - "Старые/неверные значения удалены"
+      depends_on: []
+      estimated_effort: XS
+      tags: [schema, agents, enum, critical]
+
+    - id: P0-005
+      title: "End-to-end smoke тест всего workflow"
+      gap: C5
+      priority: P0
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: plans/tests-e2e-example/
+      action: >
+        Создать plans/tests-e2e-example/ с минимальным но полным прогоном.
+        Симулировать: audit → 1 задача impl → review → verify.
+        Проверить что agent-state.json корректно переходит через все статусы.
+        Проверить что test-plan.md регенерируется на каждом шаге.
+      acceptance:
+        - "plans/tests-e2e-example/agent-state.json существует"
+        - "Содержит минимум 4 задачи (по одной на стадию)"
+        - "test-plan.md отражает финальное состояние (все задачи done)"
+        - "Все статусы задач = done, progress_percent = 100"
+        - "memory.history содержит записи для всех итераций"
+      depends_on: [P0-001, P0-002, P0-003, P0-004]
+      estimated_effort: M
+      tags: [testing, e2e, critical]
+
+    - id: P0-006
+      title: "Обновить README с актуальным quick start"
+      gap: ~
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T11:45:00Z"
+      phase: phase-0
+      file: README.md
+      action: >
+        Проверить каждый шаг quick start из README — работает ли он прямо сейчас.
+        Обновить примеры команд и ссылки.
+        Добавить раздел Troubleshooting (топ-3 ошибки).
+      acceptance:
+        - "Quick start работает без ошибок на свежей установке"
+        - "Все ссылки на файлы рабочие"
+        - "Раздел Troubleshooting присутствует"
+      depends_on: [P0-005]
+      estimated_effort: S
+      tags: [docs, readme]
+
+# ─────────────────────────────────────────────
+# PHASE 1 — СТАБИЛИЗАЦИЯ
+# Exit condition: все H-гэпы закрыты, первый реальный пользователь onboarded
+# ─────────────────────────────────────────────
+
+phase-1:
+  name: "Стабилизация"
+  goal: "Устранить все высокие гэпы H1–H5"
+  exit_metric: "Readiness Score ≥ 4.4/5, первый onboarded пользователь"
+  items:
+
+    - id: P1-007
+      title: "Создать агента test-verifier"
+      gap: H1
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T13:30:00Z"
+      phase: phase-1
+      file: agents/test-verifier.md
+      action: >
+        Создать agents/test-verifier.md по шаблону других агентов.
+        Определить failure modes специфичные для верификации.
+        Указать rules и required output.
+        Агент использует @./skills/test-verification/SKILL.md.
+        Добавить test-verifier в agent.type enum в схеме.
+      acceptance:
+        - "Файл agents/test-verifier.md существует с валидным front-matter"
+        - "Содержит: failure modes, rules, required output"
+        - "Использует @./skills/test-verification/SKILL.md"
+        - "agent.type = test-verifier добавлен в схему"
+        - "Стиль соответствует другим агентам (color, tools)"
+      depends_on: [P0-004]
+      estimated_effort: S
+      tags: [agents, verifier]
+
+    - id: P1-008
+      title: "Механизм регенерации test-plan.md при расхождении (W8.4)"
+      gap: H3
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T13:30:00Z"
+      phase: phase-1
+      file: skills/agent-workflow-core/SKILL.md
+      action: >
+        Расширить W8.4 в agent-workflow-core/SKILL.md до полного алгоритма.
+        Добавить в каждый агент pre-flight check: сравнить session.last_updated
+        в JSON с датой изменения test-plan.md.
+        При расхождении — регенерировать с предупреждением.
+      acceptance:
+        - "W8.4 содержит пошаговый алгоритм обнаружения расхождения"
+        - "Каждый агент (auditor, implementer, reviewer, strategist, verifier) содержит pre-flight check"
+        - "При расхождении выводится [AGENT] WARNING: test-plan.md was out of sync"
+        - "Регенерация происходит автоматически"
+      depends_on: [P1-007]
+      estimated_effort: S
+      tags: [workflow, state, sync]
+
+    - id: P1-009
+      title: "Pre-flight валидация agent-state.json перед стартом (W6)"
+      gap: H5
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T13:30:00Z"
+      phase: phase-1
+      file: skills/agent-workflow-core/SKILL.md
+      action: >
+        Добавить в W6 (Чек-лист начала работы) явную валидацию JSON по схеме.
+        Описать что делать если валидация не прошла (blocked state).
+        Обновить все агенты чтобы ссылались на W6 явно.
+      acceptance:
+        - "W6 содержит шаг валидации по agent-state-schema.json"
+        - "Невалидный state → агент выводит ошибку и останавливается"
+        - "Все 5 агентов (auditor, implementer, reviewer, strategist, verifier) ссылаются на W6"
+      depends_on: [P0-004]
+      estimated_effort: S
+      tags: [workflow, validation, reliability]
+
+    - id: P1-010
+      title: "Path consistency — стандартизировать .gigacode/plans/ везде"
+      gap: ~
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T13:30:00Z"
+      phase: phase-1
+      file: ~
+      action: >
+        Поиск всех упоминаний путей в skills/, agents/, context/.
+        Стандартизировать на .gigacode/plans/<task-type>-YYYY-MM-DD/.
+        Удалить все упоминания .gigacraft/state/ из файлов GigaTest.
+        Обновить agent-workflow-core/SKILL.md W1.1.
+      acceptance:
+        - "Нет упоминаний .gigacraft/state/ в файлах GigaTest"
+        - "Все пути используют .gigacode/plans/"
+        - "W1.1 содержит актуальный путь"
+      depends_on: [P0-006]
+      estimated_effort: XS
+      tags: [paths, consistency]
+
+    - id: P1-011
+      title: "Создать docs/ONBOARDING.md"
+      gap: H4
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T13:30:00Z"
+      phase: phase-1
+      file: docs/ONBOARDING.md
+      action: >
+        Описать 4 сценария: (a) нет тестов совсем, (b) есть плохие тесты,
+        (c) написать тесты для новой фичи, (d) review тестов перед PR.
+        Для каждого сценария — пошаговый guide (≤10 шагов).
+        Добавить раздел FAQ (5–7 типичных вопросов).
+      acceptance:
+        - "docs/ONBOARDING.md существует"
+        - "Покрывает минимум 4 сценария"
+        - "Каждый сценарий ≤ 10 шагов"
+        - "Содержит раздел FAQ с минимум 5 вопросами"
+      depends_on: [P0-006]
+      estimated_effort: M
+      tags: [docs, onboarding, ux]
+
+# ─────────────────────────────────────────────
+# PHASE 2 — РАСШИРЕНИЕ
+# Exit condition: 4+ оверлея, exit conditions у всех skills
+# ─────────────────────────────────────────────
+
+phase-2:
+  name: "Расширение"
+  goal: "Расширить stack coverage и улучшить UX skills"
+  exit_metric: "Readiness Score ≥ 4.7/5, 4+ оверлея"
+  items:
+
+    - id: P2-012
+      title: "Python overlay (context/python-testing.md)"
+      gap: H2
+      priority: P1
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: context/python-testing.md
+      action: >
+        Создать context/python-testing.md по образцу java-testing.md.
+        Покрыть: FastAPI/Django controllers, Service layer, Repository (SQLAlchemy), Pure logic.
+        Включить: pytest fixtures, unittest.mock, pytest-mock, структура файлов.
+      acceptance:
+        - "context/python-testing.md существует"
+        - "Структура совпадает с java-testing.md (R1–R7)"
+        - "Покрывает: FastAPI, Django, pytest, pytest-mock, SQLAlchemy"
+        - "Содержит примеры тестов с кодом"
+        - "Содержит R2 Decision Algorithm"
+      depends_on: [P1-011]
+      estimated_effort: M
+      tags: [overlay, python, stack]
+
+    - id: P2-013
+      title: "Go overlay (context/go-testing.md)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: context/go-testing.md
+      action: >
+        Создать context/go-testing.md по аналогии с python-testing.md.
+        Покрыть: HTTP handlers (net/http), Service layer, Repository, Pure logic.
+        Включить примеры с testing package, testify, httptest.
+      acceptance:
+        - "context/go-testing.md существует"
+        - "Покрывает: HTTP handlers, service, repository, pure logic"
+        - "Содержит примеры с testing, testify, httptest"
+        - "Содержит R2 Decision Algorithm"
+      depends_on: [P2-012]
+      estimated_effort: M
+      tags: [overlay, go, stack]
+
+    - id: P2-014
+      title: "Explicit exit conditions для всех skills"
+      gap: H3
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: skills/
+      action: >
+        Добавить раздел '## Exit Conditions' в каждый skill:
+        test-audit, test-implementation, test-review, test-verification.
+        Описать: что является сигналом к завершению, что передаётся следующему агенту,
+        что блокирует переход.
+      acceptance:
+        - "Раздел Exit Conditions добавлен в test-audit/SKILL.md"
+        - "Раздел Exit Conditions добавлен в test-implementation/SKILL.md"
+        - "Раздел Exit Conditions добавлен в test-review/SKILL.md"
+        - "Раздел Exit Conditions добавлен в test-verification/SKILL.md"
+        - "Каждый exit condition наблюдаем (файл, статус, лог)"
+      depends_on: [P1-009]
+      estimated_effort: S
+      tags: [skills, workflow, exit-conditions]
+
+    - id: P2-015
+      title: "State Discovery Protocol (W10)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: skills/agent-workflow-core/SKILL.md
+      action: >
+        Добавить в agent-workflow-core/SKILL.md раздел W10: State Discovery.
+        Алгоритм: поиск agent-state.json в .gigacode/plans/*/
+        Если несколько — выбор по last_updated.
+        Если ни одного — создание нового.
+      acceptance:
+        - "W10 добавлен в SKILL.md"
+        - "Алгоритм описывает: поиск, выбор при конфликте, создание нового"
+        - "Логирование: [AGENT] state discovered at <path>"
+      depends_on: [P1-010]
+      estimated_effort: XS
+      tags: [workflow, state, discovery]
+
+    - id: P2-016
+      title: "Явные инструкции загрузки оверлеев в QWEN.md / router"
+      gap: M2
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: QWEN.md
+      action: >
+        Добавить в QWEN.md или using-gigatest/SKILL.md явный алгоритм определения стека.
+        Сейчас: «when repository or task clearly calls for them» — размыто.
+        Нужно: конкретные правила (по package.json/build.gradle/pom.xml).
+        Убедиться что агент загружает нужный context/<stack>-testing.md автоматически.
+      acceptance:
+        - "QWEN.md или using-gigatest содержит алгоритм определения стека"
+        - "Агент загружает react-testing.md для React-проектов, java-testing.md для Java и т.д."
+        - "Если стек не определён — используется testing-standards.md как fallback"
+        - "Нет ситуации когда агент пишет тесты без stack-контекста"
+      depends_on: [P0-006]
+      estimated_effort: XS
+      tags: [workflow, overlays, quality]
+
+    - id: P2-017
+      title: "Специфицировать template синтаксис test-plan-template.md"
+      gap: M3
+      priority: P3
+      status: done
+      completed_at: "2026-04-18T14:30:00Z"
+      phase: phase-2
+      file: docs/TEMPLATE-SYNTAX.md
+      action: >
+        Добавить комментарий в начало test-plan-template.md с описанием синтаксиса.
+        Указать что это Handlebars-like template: {{#each}}, {{#if}}, {{variable}}.
+        Обновить test-plan-template/SKILL.md (Phase Render) с инструкцией по использованию.
+        Убедиться что LLM корректно понимает и использует template variables.
+      acceptance:
+        - "test-plan-template.md содержит комментарий с описанием синтаксиса в начале"
+        - "SKILL.md описывает Phase Render с примерами template syntax"
+        - "Smoke-тест подтверждает корректную генерацию из template"
+      depends_on: [P0-001]
+      estimated_effort: XS
+      tags: [template, specs, quality]
+
+# ─────────────────────────────────────────────
+# PHASE 3 — ТУЛИНГ
+# ─────────────────────────────────────────────
+
+phase-3:
+  name: "Тулинг"
+  goal: "Локальные утилиты для валидации и генерации"
+  exit_metric: "CLI-утилиты работают локально"
+  items:
+
+    - id: P3-016
+      title: "Node.js валидатор JSON Schema (tools/validate-state.js)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T15:00:00Z"
+      phase: phase-3
+      file: tools/validate-state.js
+      action: >
+        Создать tools/validate-state.js — CLI скрипт.
+        Принимает путь к agent-state.json, валидирует по agent-state-schema.json.
+        Возвращает exit code 0 (valid) / 1 (invalid) + описание ошибок.
+      acceptance:
+        - "tools/validate-state.js существует"
+        - "node tools/validate-state.js plans/tests-audit-example/agent-state.json → exit 0"
+        - "При невалидном JSON → exit 1 + описание ошибок в stdout"
+      depends_on: [P0-003, P2-015]
+      estimated_effort: S
+      tags: [tooling, validation]
+
+    - id: P3-018
+      title: "Markdown report generator (tools/generate-report.js)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T15:15:00Z"
+      phase: phase-3
+      file: tools/generate-report.js
+      action: >
+        Создать tools/generate-report.js.
+        Принимает agent-state.json → генерирует test-plan.md.
+        Output идентичен шаблону из test-plan-template.md.
+      acceptance:
+        - "tools/generate-report.js существует"
+        - "Output идентичен шаблону из skills/test-plan-template/test-plan-template.md"
+        - "Работает на plans/tests-audit-example/agent-state.json"
+        - "Является CLI инструментом (принимает path как аргумент)"
+      depends_on: [P3-016]
+      estimated_effort: M
+      tags: [tooling, report, markdown]
+
+# ─────────────────────────────────────────────
+# PHASE 4 — ПРЕЗЕНТАЦИЯ И DEMO
+# ─────────────────────────────────────────────
+
+phase-4:
+  name: "Презентация и Demo"
+  goal: "GigaTest можно показать за 15 минут"
+  exit_metric: "Demo проходит за ≤ 15 минут"
+  items:
+
+    - id: P4-019
+      title: "Demo script (docs/DEMO.md)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T16:00:00Z"
+      phase: phase-4
+      file: docs/DEMO.md
+      action: >
+        Создать docs/DEMO.md — пошаговый сценарий демонстрации.
+        Реальный (или учебный) проект → полный цикл audit → verify.
+        Время демо ≤ 15 минут.
+      acceptance:
+        - "docs/DEMO.md существует"
+        - "Сценарий проходит за ≤ 15 минут"
+        - "Демонстрирует все 5 стадий"
+        - "Показывает agent-state.json и test-plan.md в действии"
+        - "Есть учебный проект или ссылка на него"
+      depends_on: [P1-011]
+      estimated_effort: M
+      tags: [docs, demo, presentation]
+
+    - id: P4-020
+      title: "Сравнительная таблица (docs/COMPARISON.md)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T16:00:00Z"
+      phase: phase-4
+      file: docs/COMPARISON.md
+      action: >
+        Создать docs/COMPARISON.md.
+        GigaTest vs superpowers vs raw AI vs ничего.
+        По ключевым dimensions из VISION.md.
+      acceptance:
+        - "docs/COMPARISON.md существует"
+        - "Содержит таблицу сравнения с ≥ 3 альтернативами"
+        - "Покрывает все killer features из VISION.md"
+      depends_on: [P1-011]
+      estimated_effort: S
+      tags: [docs, comparison, positioning]
+
+    - id: P4-021
+      title: "Метрики adoption (docs/METRICS.md)"
+      gap: ~
+      priority: P2
+      status: done
+      completed_at: "2026-04-18T16:00:00Z"
+      phase: phase-4
+      file: docs/METRICS.md
+      action: >
+        Определить какие метрики собираем (сессии, стадии, завершения).
+        Описать в docs/METRICS.md: что, как, откуда берём данные.
+        Включить North Star Metric и определение success.
+      acceptance:
+        - "docs/METRICS.md существует"
+        - "Содержит North Star Metric с целевым значением"
+        - "Описывает как минимум 5 метрик"
+        - "Описывает источники данных для каждой метрики"
+      depends_on: [P4-019]
+      estimated_effort: XS
+      tags: [docs, metrics, analytics]
+
+# ─────────────────────────────────────────────
+# BRIDGE — МОСТ GIGACRAFT ↔ GIGATEST
+# Зависит от завершения Phase 0 GigaTest
+# ─────────────────────────────────────────────
+
+bridge:
+  name: "Мост GigaCraft ↔ GigaTest"
+  goal: "Опциональная interoperability между продуктами"
+  exit_metric: "Все 3 уровня задокументированы и реализованы"
+  items:
+
+    - id: BRIDGE-001
+      title: "Уровень 1: Testing Reminder в GigaCraft"
+      priority: P2
+      status: pending
+      phase: bridge
+      file: "gigacraft-0.1.0/skills/verification-before-completion/SKILL.md"
+      note: "Реализуется в репозитории GigaCraft, не GigaTest"
+      action: >
+        Добавить блок Testing Reminder в конец стадии verify в GigaCraft.
+        Напоминание о /audit-tests при наличии touched endpoints/logic/models.
+        Не блокирует completion.
+      acceptance:
+        - "Блок добавлен в gigacraft verification-before-completion/SKILL.md"
+        - "Напоминание не блокирует completion GigaCraft"
+        - "GigaTest остаётся опциональным"
+      depends_on: [P0-006]
+      estimated_effort: XS
+      tags: [bridge, gigacraft, awareness]
+
+    - id: BRIDGE-002
+      title: "Уровень 2: Cross-workflow Trigger (GigaCraft Plan Discovery)"
+      priority: P2
+      status: pending
+      phase: bridge
+      file: skills/test-audit/SKILL.md
+      action: >
+        Добавить в test-audit/SKILL.md Phase 1 (Discovery) подраздел GigaCraft Plan Discovery.
+        Алгоритм: поиск .gigacraft/plans/*/, извлечение touched_files[], использование как seed.
+        При отсутствии — стандартный discovery.
+      acceptance:
+        - "Подраздел GigaCraft Plan Discovery добавлен в test-audit/SKILL.md"
+        - "Алгоритм обрабатывает отсутствие .gigacraft/plans/"
+        - "Логирование: [AGENT] GigaCraft seed: N files"
+        - "GigaTest работает идентично без GigaCraft"
+        - "Контракт touched_files[] задокументирован"
+      depends_on: [P1-011, BRIDGE-001]
+      estimated_effort: S
+      tags: [bridge, cross-workflow, discovery]
+
+    - id: BRIDGE-003
+      title: "Уровень 3: Синхронизировать testing-standards.md между продуктами"
+      priority: P2
+      status: pending
+      phase: bridge
+      file: context/testing-standards.md
+      action: >
+        Добавить версию и дату синхронизации в заголовок context/testing-standards.md.
+        Задокументировать процедуру обновления (два PR, ссылки на общий issue).
+        Согласовать с командой GigaCraft какой продукт хранит мастер-копию.
+      acceptance:
+        - "context/testing-standards.md содержит версию и дату синхронизации"
+        - "Процедура обновления задокументирована в strategy/BLOCK-1-GIGACRAFT-BRIDGE.md"
+        - "Содержимое идентично в обоих продуктах"
+      depends_on: [P0-006]
+      estimated_effort: XS
+      tags: [bridge, standards, sync]

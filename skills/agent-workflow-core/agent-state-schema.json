@@ -3,6 +3,7 @@
   "title": "AgentState",
   "description": "Универсальная структура состояния автономного суб-агента для gigatest workflow (v2.4)",
   "type": "object",
+  "additionalProperties": false,
   "required": ["version", "agent", "project", "session", "plan", "memory"],
   "properties": {
     "version": {
@@ -13,12 +14,13 @@
     "agent": {
       "type": "object",
       "description": "Идентификация текущего агента",
+      "additionalProperties": false,
       "required": ["type", "role", "instance_id"],
       "properties": {
         "type": {
           "type": "string",
           "description": "Тип агента",
-          "enum": ["test-auditor", "test-implementer", "test-reviewer", "test-strategist", "test-verifier", "architect", "code-reviewer"]
+          "enum": ["test-auditor", "test-implementer", "test-reviewer", "test-strategist", "test-verifier"]
         },
         "role": {
           "type": "string",
@@ -33,6 +35,7 @@
     "project": {
       "type": "object",
       "description": "Информация о проекте",
+      "additionalProperties": false,
       "required": ["name", "root_path"],
       "properties": {
         "name": {"type": "string"},
@@ -48,6 +51,7 @@
     "session": {
       "type": "object",
       "description": "Текущая сессия работы агента",
+      "additionalProperties": false,
       "required": ["id", "started_at", "last_updated", "status", "mode", "checkpoint"],
       "properties": {
         "id": {"type": "string"},
@@ -64,6 +68,7 @@
         },
         "checkpoint": {
           "type": "object",
+          "additionalProperties": false,
           "required": ["iteration", "plan_item_id", "description"],
           "properties": {
             "iteration": {"type": "integer", "minimum": 1},
@@ -75,12 +80,14 @@
     },
     "plan": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["items", "meta"],
       "properties": {
         "items": {
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": ["id", "type", "name", "assigned_agent", "status", "priority", "dependencies", "files"],
             "properties": {
               "id": {"type": "string"},
@@ -154,6 +161,7 @@
               "completed_at": {"type": ["string", "null"], "format": "date-time"},
               "result": {
                 "type": ["object", "null"],
+                "additionalProperties": false,
                 "properties": {
                   "status": {"type": "string", "enum": ["success", "failure", "partial"]},
                   "message": {"type": "string"}
@@ -163,7 +171,7 @@
               "review_required": {"type": "boolean"},
               "review_status": {
                 "type": ["string", "null"],
-                "enum": ["pending", "approved", "changes_requested"]
+                "enum": ["pending", "approved", "changes_requested", null]
               },
               "reviewed_by": {"type": ["string", "null"]}
             }
@@ -171,6 +179,7 @@
         },
         "meta": {
           "type": "object",
+          "additionalProperties": false,
           "required": ["total_items", "done", "in_progress", "pending", "blocked", "skipped", "progress_percent"],
           "properties": {
             "total_items": {"type": "integer"},
@@ -186,12 +195,14 @@
     },
     "memory": {
       "type": "object",
+      "additionalProperties": false,
       "required": ["artifacts", "context", "history"],
       "properties": {
         "artifacts": {
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": ["id", "type", "path", "created_at", "description"],
             "properties": {
               "id": {"type": "string"},
@@ -205,10 +216,11 @@
         },
         "context": {
           "type": "object",
-          "additionalProperties": true,
+          "additionalProperties": false,
           "properties": {
             "last_error": {
               "type": ["object", "null"],
+              "additionalProperties": false,
               "properties": {
                 "code": {"type": "string"},
                 "message": {"type": "string"},
@@ -218,6 +230,7 @@
             },
             "rules": {
               "type": "object",
+              "additionalProperties": false,
               "properties": {
                 "version": {"type": "string"},
                 "content": {"type": "object"},
@@ -238,6 +251,7 @@
               "type": "array",
               "items": {
                 "type": "object",
+                "additionalProperties": false,
                 "properties": {
                   "file": {"type": "string"},
                   "checksum": {"type": "string"},
@@ -251,6 +265,7 @@
           "type": "array",
           "items": {
             "type": "object",
+            "additionalProperties": false,
             "required": ["iteration", "plan_item_id", "action", "timestamp"],
             "properties": {
               "iteration": {"type": "integer"},

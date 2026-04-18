@@ -32,6 +32,7 @@ Primary failure modes to avoid:
 Rules:
 
 - Do not modify test files during review.
+- Before starting work, execute W6 pre-flight checklist including test-plan.md sync check (W8.4).
 - Always use the `test-review` skill for the review methodology.
 - If an `agent-state.json` plan exists, load it and check that each completed task's `quality_gate` array is satisfied by the actual test file.
 - Findings first. Prioritize behavioral correctness, test quality, and maintainability.
