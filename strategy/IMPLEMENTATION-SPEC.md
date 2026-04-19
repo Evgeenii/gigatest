@@ -1,10 +1,10 @@
 # IMPLEMENTATION-SPEC.md — Спецификация имплементации для агентов
 
-> Версия: 1.2 | Дата: 2026-04-18
-> Предыдущая версия: 1.1 (2026-04-18)
+> Версия: 1.3 | Дата: 2026-04-19
+> Предыдущая версия: 1.2 (2026-04-18)
 >
-> **Изменения v1.2:** Добавлены Phase 5 паттерны (§10), конвенции для convention files (§2, §12),
-> предложен W11 Convention Loading Protocol.
+> **Изменения v1.3:** Добавлен Phase 6 (§10.6) — Architecture & Prompt Quality реализации
+> на основе ARCHITECTURE-SPEC.md и PROMPT-QUALITY-SPEC.md. Обновлён §12 (ссылки).
 >
 > **Назначение:** Software Design Document (SDD) для агентной реализации задач GigaTest.
 > Описывает «КАК» — технические решения, конвенции, паттерны имплементации.
@@ -568,6 +568,26 @@ plans/tests-e2e-example/
 > Зависимость: P5-023 требует P5-022 (schema следует за skill), P5-024 требует P5-023 (agent генерирует по schema).
 > P5-025 (W11) требует стабильных W1-W10 и может идти параллельно с P5-024.
 
+### Phase 6 — Architecture & Prompt Quality
+
+| Задача | Паттерн |
+|--------|---------|
+| P0-A1: W1.4 determinism | Заменить «или иную логику» → алгоритм: sort by priority desc, then id asc |
+| P0-A5: State Discovery v2 | W10.5: сортировать по session.last_updated (JSON timestamp, не mtime) |
+| P0-A3: test-plan.md content_hash | Добавить field в session, сравнивать hash при regenerate |
+| P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards |
+| P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order |
+| PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнить вместе |
+| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 |
+| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 |
+| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка |
+
+**Порядок выполнения P0:** P0-A1+PQ-01 → P0-A5 → P0-A3 → P0-A4 → P0-A2 → PQ-02 → PQ-03 → PQ-04
+
+> Зависимость: P0-A1 и PQ-01 — один файл, делать за одну итерацию.
+> P0-A3 требует обновления обеих JSON Schema.
+> Остальные P0 независимы.
+
 ### Bridge — Мост
 
 | Задача | Паттерн |
@@ -606,7 +626,7 @@ plans/tests-e2e-example/
 - [ ] Primary Failure Modes: 5–8 пунктов
 - [ ] Rules: минимум 4 правила
 - [ ] Required Output описан
-- [ ] Ссылка на skill через `@./skills/...`
+- [ ] Ссылка на skill через `@./skills/...`.
 
 ### для schemas
 
@@ -614,6 +634,14 @@ plans/tests-e2e-example/
 - [ ] `$ref` composition используется для общих полей
 - [ ] Пример `plans/tests-audit-example/agent-state.json` валидируется
 - [ ] Enum `agent.type` синхронизирован с `agents/`
+
+### для Phase 6 (Architecture & Prompt Quality)
+
+- [ ] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику»
+- [ ] Если изменены JSON Schema — обе схемы обновлены консистентно
+- [ ] Если добавлен content_hash — примеры state файлов содержат новое поле
+- [ ] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку
+- [ ] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку
 
 ---
 
@@ -761,4 +789,4 @@ W11. Convention Loading Protocol
 ---
 
 *Документ принадлежит: strategy/*
-*Смежные документы: VISION.md, BLOCK-2-GIGATEST-GROWTH.md, backlog.yaml, READINESS-MATRIX.md*
+*Смежные документы: VISION.md, BLOCK-2-GIGATEST-GROWTH.md, backlog.yaml, READINESS-MATRIX.md, ARCHITECTURE-SPEC.md, PROMPT-QUALITY-SPEC.md*

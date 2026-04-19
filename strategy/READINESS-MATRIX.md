@@ -1,34 +1,38 @@
 # READINESS-MATRIX.md — Матрица готовности GigaTest
 
-> Версия: 4.2 | Дата: 2026-04-19
-> Предыдущая версия: 4.1 (2026-04-18, до Phase 5)
+> Версия: 5.0 | Дата: 2026-04-19
+> Предыдущая версия: 4.2 (2026-04-19, до Architecture & Prompt Quality аудита)
 >
 > **Использование:** Объективная оценка текущего состояния GigaTest по всем измерениям.
 > Служит точкой принятия решений и приоритизации.
 >
 > **Методология:** 5-балльная шкала. 1 = отсутствует / критичный гэп. 5 = production-ready.
 >
-> **Изменения v4.2:** `testing-standards.md` стал по-настоящему stack-agnostic (был React-центричен).
-> React-specific forbidden patterns перенесены в `react-testing.md §R8`.
-> Skills и агенты адаптированы: test-audit, test-review, test-implementation, test-auditor, test-reviewer.
+> **Изменения v5.0:** Добавлены два новых измерения: Архитектурная надёжность (3.5/5),
+> Качество промтов (3.5/5). Проведён полный архитектурный и лингвистический аудит:
+> ARCHITECTURE-SPEC.md (6 противоречий, 6 edge cases, 15 P0-P2 задач),
+> PROMPT-QUALITY-SPEC.md (7/10 rating, 5 DRY-паттернов, 19 P0-P2 задач).
+> Phase 6 добавлен в backlog.
 
 ---
 
 ## Сводка
 
-| Измерение | Оценка | Δ к v3.1 | Статус |
+| Измерение | Оценка | Δ к v4.2 | Статус |
 |-----------|--------|----------|--------|
 | Архитектура workflow | 4.8 / 5 | — | 🟢 Production-ready |
-| State Management | 4.9 / 5 | +0.1 | 🟢 Production-ready |
+| State Management | 4.9 / 5 | — | 🟢 Production-ready |
 | Агентная система | 4.9 / 5 | — | 🟢 Production-ready |
 | Skills / Навыки | 5.0 / 5 | — | 🟢 Production-ready |
-| Stack Coverage | 4.8 / 5 | +0.1 | 🟢 Growing |
-| Developer Experience | 4.9 / 5 | +0.2 | 🟢 Production-ready |
-| Документация | 4.6 / 5 | +0.1 | 🟢 Production-ready |
+| Stack Coverage | 4.7 / 5 | -0.1 | 🟢 Growing |
+| Developer Experience | 4.7 / 5 | — | 🟢 Production-ready |
+| Документация | 4.5 / 5 | — | 🟢 Production-ready |
 | Интеграция (мост) | 1.5 / 5 | — | 🔴 Не начато |
-| Тулинг | 4.5 / 5 | +3.5 | 🟢 New (Phase 3 complete) |
-| Convention Discovery | 0.5 / 5 | Novum | 🔴 Planned (Phase 5 — стратегия готова, имплементация pending) |
-| **ИТОГО** | **4.7 / 5** | **-0.2** | 🟡 **Stable (Phase 5 в бэклоге)** |
+| Тулинг | 4.5 / 5 | — | 🟢 Phase 3 complete |
+| Convention Discovery | 0.5 / 5 | — | 🔴 Planned (Phase 5) |
+| **Архитектурная надёжность** | **3.5 / 5** | Novum | 🟡 **6 противоречий, 6 edge cases** |
+| **Качество промтов** | **3.5 / 5** | Novum | 🟡 **7/10, 10 DRY patterns, 7 ambiguities** |
+| **ИТОГО** | **4.0 / 5** | **-0.4** | 🟡 **Stable (Phase 6 в бэклоге)** |
 
 ---
 
@@ -285,6 +289,29 @@
 
 ---
 
+## Новые гэпы Phase 6 (Architecture & Prompt Quality — из аудита v5.0)
+
+### Архитектурные (ARCHITECTURE-SPEC.md)
+
+| ID | Severity | Компонент | Описание | Блокирует |
+|----|----------|-----------|----------|-----------|
+| P0-A1 | P0 | workflow | Non-determinism в W1.4: «или иную логику» | Повторяемость сессий |
+| P0-A2 | P0 | tooling | Нет семантической валидации state | schema-valid но логически некорректный state |
+| P0-A3 | P0 | workflow | mtime-based конфликт test-plan.md — молча перезатрёт правки | Двойная документация |
+| P0-A4 | P0 | workflow | Мультистек: нет приоритизации оверлеев | Undefined behavior на React+Java проектах |
+| P0-A5 | P0 | workflow | State Discovery: выбор плана по mtime а не JSON timestamp | Запуск не того плана |
+
+### Prompt Quality (PROMPT-QUALITY-SPEC.md)
+
+| ID | Severity | Компонент | Описание | Блокирует |
+|----|----------|-----------|----------|-----------|
+| PQ-01 | P0 | workflow | «или иную логику» — пересекается с P0-A1 | Детерминизм агента |
+| PQ-02 | P0 | audit | «менее 3 → downgrade» без указания статуса | Непредсказуемый coverage_status |
+| PQ-03 | P0 | QWEN.md | Дублирование Stack Detection таблицы | DRY violation |
+| PQ-04 | P0 | standards | Quality Checklist дублируется в 4 файлах | DRY violation, рассинхрон |
+
+---
+
 ## Дорожная карта готовности
 
 ```
@@ -292,8 +319,10 @@
 После Phase 0:       4.0/5 ████████████░░░░ Production-ready (core)
 После Phase 1:       4.4/5 █████████████░░░ Stable ✅
 После Phase 2:       4.7/5 ██████████████░░ Growing
-ТЕКУЩЕЕ (после Phase 4):    4.9/5 ███████████████░ Stable+ (All core phases complete)
-После Phase 5:           5.0/5 ████████████████ Convention Discovery + Project-Aware
+После Phase 3–4:     4.9/5 ███████████████░ Stable+ (All core phases complete)
+После аудита v5.0:   4.0/5 ████████████░░░░ ↓ New dimensions added (Arch + Prompt)
+После Phase 5:       5.0/5 ████████████████ Convention Discovery + Project-Aware
+После Phase 6:       5.0/5 ████████████████ Architecture + Prompt Quality production-grade
 ```
 
 ---
