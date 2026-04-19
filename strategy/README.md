@@ -1,6 +1,9 @@
 # Strategy — Навигация
 
-> Версия: 1.2 | Дата: 2026-04-18
+> Версия: 1.6 | Дата: 2026-04-18
+>
+> **Изменения v1.6:** PHASE-5-CONVENTION-DISCOVERY.md удалён — весь контент интегрирован в BLOCK-2-GIGATEST-GROWTH.md Phase 5 секцию.
+> Обновлены BLOCK-2 (v2.4) → полный контекст Phase 5: проблема, архитектура, workflow, риски, feasibility.
 >
 > **Назначение:** Индекс стратегических документов GigaCraft ↔ GigaTest.
 > Все файлы — human-readable Markdown. Machine-readable бэклог — `backlog.yaml`.
@@ -14,7 +17,7 @@
 | [`VISION.md`](VISION.md) | Все | Видение продуктов, JTBD-разделение, why two products, principles |
 | [`IMPLEMENTATION-SPEC.md`](IMPLEMENTATION-SPEC.md) | Агенты, Dev | **SDD**: технические конвенции, паттерны имплементации, чек-листы готовности |
 | [`BLOCK-1-GIGACRAFT-BRIDGE.md`](BLOCK-1-GIGACRAFT-BRIDGE.md) | GigaCraft dev | Микро-доработки в GigaCraft для моста (awareness + cross-workflow trigger) |
-| [`BLOCK-2-GIGATEST-GROWTH.md`](BLOCK-2-GIGATEST-GROWTH.md) | GigaTest dev | Стратегия развития GigaTest: prod-ready → overlays → тулинг → презентация |
+| [`BLOCK-2-GIGATEST-GROWTH.md`](BLOCK-2-GIGATEST-GROWTH.md) | GigaTest dev | Стратегия развития GigaTest: prod-ready → overlays → тулинг → презентация → convention discovery |
 | [`READINESS-MATRIX.md`](READINESS-MATRIX.md) | Все | Матрица готовности GigaTest — оценки по 10 измерениям, гэпы, дорожная карта |
 | [backlog.yaml](backlog.yaml) | Agents, CI | Machine-readable бэклог с приоритетами, статусами, зависимостями |
 | 📦 [`archive/`](archive/) | Все | Исторические документы (аналитика до Phase 0, старые черновики) |
@@ -28,6 +31,7 @@
 | [`docs/COMPARISON.md`](../docs/COMPARISON.md) | Принятие решения | Сравнение GigaTest с альтернативами |
 | [`docs/METRICS.md`](../docs/METRICS.md) | Продукт, аналитика | Метрики успеха: North Star, формулы |
 | [`docs/TEMPLATE-SYNTAX.md`](../docs/TEMPLATE-SYNTAX.md) | Авторы шаблонов | Спецификация Handlebars-like синтаксиса |
+| [`docs/CONVENTION-DISCOVERY.md`](../docs/CONVENTION-DISCOVERY.md) | Новые пользователи Phase 5 | Convention Discovery: как сканировать, использовать, обновлять |
 
 ---
 
@@ -46,7 +50,7 @@
 ```
 VISION.md        ← ЧТО и ЗАЧЕМ (видение, JTBD, killer features)
      ↓
-BLOCK-2-...      ← КОГДА (фазы, дорожная карта)
+BLOCK-2-...      ← КОГДА (фазы, дорожная карта, включая Phase 5)
      ↓
 backlog.yaml     ← КАКИЕ задачи (machine-readable бэклог)
      ↓

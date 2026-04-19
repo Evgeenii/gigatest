@@ -26,14 +26,16 @@ For each test file, evaluate against the mandatory quality checklist:
 
 #### Test Quality Checklist
 
-- [ ] **Behavior, not implementation**: Does the test check observable behavior rather than internal state (no `component.state`, no `instance().method`)?
-- [ ] **Semantic queries**: Are queries using `getByRole`, `getByLabelText`, `getByText` (for UI) or meaningful assertions (for backend)?
-- [ ] **Async correctness**: Are async operations properly handled (`await findBy*`, `waitFor`, not bare `setTimeout`)?
-- [ ] **No excessive mocks**: Are only necessary dependencies mocked? No mocking of internal logic?
-- [ ] **Single scenario per test**: Does each `it`/`test` block check one scenario?
-- [ ] **Descriptive naming**: Does the test name describe the expected behavior (not implementation detail)?
-- [ ] **Stable data**: For snapshots, are dates/UUIDs/random values mocked or fixed?
-- [ ] **Edge case coverage**: Are null/undefined/empty/error states tested where applicable?
+Базовый checklist stack-agnostic. Stack-специфичные детали см. в `context/<stack>-testing.md`.
+
+- [ ] **Behavior, not implementation**: Does the test check observable behavior rather than internal state (no private fields, no internal methods, no reflection)?
+- [ ] **Meaningful assertions**: Are assertions checking observable outcomes (response body, status code, DOM content, returned value) rather than internal state?
+- [ ] **Async/Interaction correctness**: Are async operations properly handled (`await`/`waitFor`/`async/await`/`assertThrows`), not bare `setTimeout`/synchronous calls? For UI: interaction events properly simulated?
+- [ ] **No excessive mocks**: Are only necessary dependencies mocked? No mocking of internal logic within the tested module?
+- [ ] **Single scenario per test**: Does each test block check exactly one scenario?
+- [ ] **Descriptive naming**: Does the test name describe the expected behavior (e.g. `should_return_404_when_not_found`), not implementation (`test_get_user`)?
+- [ ] **Stable data**: Are dates/UUIDs/random values mocked or fixed for deterministic tests?
+- [ ] **Edge case coverage**: Are null/undefined/empty/error/boundary states tested where applicable?
 - [ ] **No duplication**: Is there no duplication with other existing tests for the same behavior?
 - [ ] **Testability**: Can this test be simplified (fewer mocks, simpler setup, less indirection)?
 
@@ -64,14 +66,23 @@ Output a summary table:
 
 ## Forbidden Patterns
 
-Flag if found in tests:
+Эти паттерны запрещены для **любого** стека. React-специфичные см. в `context/react-testing.md`.
+
+| Pattern | Why it's bad | Stack |
+|---------|-------------|-------|
+| Asserting on internal state (e.g. `component.state`, private fields, internal variables) | Testing internals, not observable behavior | Any |
+| Mocking internal functions of the tested module | Hides real dependencies, makes test meaningless | Any |
+| `toMatchSnapshot()` as the only assertion | No behavioral verification | Any |
+| Test assertions without any assertion | Test passes without verifying anything | Any |
+| Order-dependent tests (tests pass only in a specific sequence) | Unpredictable CI behavior | Any |
+
+**React-специфичные** (apply только к React-проектам):
 
 | Pattern | Why it's bad |
 |---------|-------------|
-| `expect(component.state).toBe(...)` | Testing internal state, not behavior |
-| `jest.mock(module, () => fn: jest.fn())` on internal functions | Mocking implementation details |
+| `expect(component.state).toBe(...)` | Testing internal component state |
+| `jest.mock()` on internal React functions | Mocking implementation details |
 | `expect(wrapper.instance().method).toHaveBeenCalled()` | Testing implementation, not behavior |
-| `toMatchSnapshot()` as the only assertion | No behavioral verification |
 | Direct `act(() => ...)` without `await` | Outdated pattern, potential race condition |
 
 ## Rules

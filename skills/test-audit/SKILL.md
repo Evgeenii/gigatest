@@ -13,9 +13,13 @@ Perform a comprehensive analysis of existing tests, identify coverage and qualit
 
 ### Phase 1: Discovery
 
-1. Scan the project for all test files (`*.test.*`, `*.spec.*`, `__tests__/`).
-2. For each test file, identify its target (component, function, hook, selector, service).
-3. Map testable targets to their coverage status by following the `@./skills/agent-workflow-core/SKILL.md`.
+1. Scan the project for all test files:
+   - React/JS/TS: `*.test.*`, `*.spec.*`, `__tests__/`
+   - Java: `*Test.java`, `*IntegrationTest.java`
+   - Python: `test_*.py`, `*_test.py`
+   - Go: `*_test.go`
+2. For each test file, identify its target (component, function, controller, service, repository, etc.).
+3. Map testable targets to their coverage status by following the `@./skills/agent-workflow-core/SKILL.md` and the corresponding `context/<stack>-testing.md` overlay.
 
 ### Phase 2: Quality Analysis
 
@@ -23,12 +27,16 @@ For each test file, evaluate quality using the mandatory checklist:
 
 #### Quality Checklist
 
-- [ ] How many `it`/`test` blocks? (less than 3 → automatic downgrade)
-- [ ] Are there user interaction calls? (`userEvent`, `fireEvent` for UI; for backend: integration setup)
-- [ ] Are there async checks? (`await findBy*`, `waitFor`, or equivalent)
-- [ ] Are different states tested? (loading, error, empty, success, edge cases)
-- [ ] Is there null/undefined/empty array handling?
-- [ ] Are errors tested? (try/catch, error boundaries, failed API responses)
+Базовая checklist применяется ко **всем** тестам. Stack-специфичные элементы —
+в соответствующем `context/<stack>-testing.md` overlay (R4).
+
+**Базовые вопросы (любой стек):**
+- [ ] Сколько `it`/`test`/`@Test`/`def test_`/`func Test*` блоков? (менее 3 → автоматический downgrade)
+- [ ] Есть ли проверка взаимодействия? (UI: `userEvent`; backend: HTTP-вызов через supertest/TestClient/httptest; сервис: вызов метода)
+- [ ] Есть ли проверки асинхронного поведения? (`await findBy*`, `waitFor`, `async/await`, `assertThrows`)
+- [ ] Проверены ли разные состояния? (success, error, empty, edge cases)
+- [ ] Обработаны ли `null`/`undefined`/`None`/`nil`/пустые коллекции?
+- [ ] Проверены ли ошибки? (try/catch, error boundaries, failed API responses, исключения)
 
 #### Coverage Classification
 
@@ -43,12 +51,12 @@ For each test file, evaluate quality using the mandatory checklist:
 
 Classify each gap by priority:
 
-| Priority | Criteria |
-|----------|----------|
-| **critical** | Entry points (App, main pages, public API) with no tests or invalid tests |
-| **high** | Components with user interactions (forms, buttons) that have `partial` coverage |
-| **medium** | Utilities, selectors, hooks with `partial` coverage |
-| **low** | Static components or pure helpers with no complex logic |
+| Priority | Criteria | Примеры |
+|----------|----------|---------|
+| **critical** | Entry points (App/Main, public API, key controllers/routes/handlers) with no tests or invalid tests | React `App.tsx` без тестов; Java `UserController` без тестов; Python `/api/users` без тестов |
+| **high** | Components with user interactions (forms, buttons, views) OR critical services with `partial` coverage | Форма авторизации; `UserService` с бизнес-логикой |
+| **medium** | Utilities, selectors, hooks, helpers, non-critical services with `partial` coverage | `validateEmail`; мапперы; хуки данных |
+| **low** | Static components, pure helpers, simple getters with no complex logic | Конфигурационные файлы; UI-элементы без логики |
 
 ### Phase 4: Plan Generation
 
@@ -80,8 +88,9 @@ Output the audit summary in the standard format:
 - Do not assign `partial` status based solely on test file existence; evaluate quality.
 - Do not skip the quality checklist for any target with tests.
 - Do not skip `missing_requirements` — the user must know exactly what needs to be added.
-- For targets with UI interactions (buttons, forms), if no `userEvent` is present → status is `partial`.
-- For targets with async operations (API calls, timers), if no `await findBy*` or `waitFor` → status is `partial`.
+- For targets with UI interactions (forms, buttons, views), if no user interaction test (`userEvent`, `fireEvent`) is present → status is `partial`. **(React-проект)**
+- For targets with HTTP endpoint exposure, if no integration test (`supertest`, `TestClient`, `httptest`) is present → status is `partial`. **(Backend-проект)**
+- For targets with async operations (API calls, DB queries, timers), if no async/wait behavior check → status is `partial`.
 - Mark blocked items (e.g., component can't be resolved) and continue; do not halt execution.
 - Output the final report grouped by priority: critical → high → medium → low.
 - After audit completion, present the plan summary and ask for user confirmation before proceeding to `test-implementation`.

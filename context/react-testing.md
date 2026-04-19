@@ -138,3 +138,28 @@ describe('useCustomHook', () => {
 - Тесты: `ComponentName.test.tsx` рядом с компонентом ИЛИ в `__tests__/`
 - Утилиты (`test-utils.tsx`, `renderWithProviders`): `src/test/`
 - MSW handlers: `src/test/mocks/`
+
+## R8. React-Specific Forbidden Patterns
+
+Эти паттерны запрещены **только** для React-проектов. Они являются конкретизацией
+общих принципов из `testing-standards.md §4` применительно к React экосистеме.
+
+| Паттерн | Почему плох | Альтернатива |
+|---------|-------------|--------------|
+| `expect(component.state).toBe(...)` | Тестирование внутреннего состояния компонента. Ломается при рефакторинге | Проверять DOM через `getByRole`, `getByText` |
+| `expect(wrapper.instance().method)` (Enzyme) | Тестирование реализации, а не наблюдаемого поведения | Использовать RTL `fireEvent`/`userEvent` |
+| `jest.mock(internalFn)` внутри тестируемого компонента | Мокание внутренней логики скрывает реальные зависимости | Тестировать компонент целиком, мокать только API-вызовы |
+| `act(() => ...)` без `await` | Устаревший паттерн, приводит к race condition | `await act(async () => ...)` или `waitFor` |
+| `wrapper.find('SomeComponent').length` | Тестирование структуры/implementation details | `screen.getByRole` — проверка видимого результата |
+| `componentDidMount` spy | Тестирование lifecycle вместо поведения | Проверять что компонент отрендерил ожидаемый результат |
+| Direct DOM manipulation (`element.style`, `element.value`) | Манипуляция DOM вместо пользовательского действия | `userEvent.type`, `userEvent.selectOptions` |
+| `shallow()` render (Enzyme) | shallow не рендерит дочерние компоненты, скрывает реальные баги | `render()` (full DOM) из RTL |
+
+### R8.1 Deprecated Tools
+
+**Enzyme** — считается deprecated. Если проект использует Enzyme, пометить в audit как `partial`
+coverage и рекомендовать миграцию на React Testing Library + `@testing-library/user-event`.
+
+---
+
+*Смежные документы: testing-standards.md, js-ts-testing.md*

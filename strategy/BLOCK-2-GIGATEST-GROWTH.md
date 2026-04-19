@@ -1,9 +1,10 @@
 # BLOCK-2-GIGATEST-GROWTH.md — Стратегия развития GigaTest
 
-> Версия: 2.3 | Дата: 2026-04-18
-> Предыдущая версия: 2.2 (2026-04-18)
+> Версия: 2.5 | Дата: 2026-04-18
+> Предыдущая версия: 2.4 (2026-04-18)
 >
-> **Изменения v2.3:** Phase 4 завершён. Созданы docs/DEMO.md, docs/COMPARISON.md, docs/METRICS.md.
+> **Изменения v2.5:** Интегрирован аналитический контент из удалённого PHASE-5-CONVENTION-DISCOVERY.md:
+> проблема, архитектура решения, workflow, риски, feasibility (cost estimates, benchmarks).
 
 ---
 
@@ -36,10 +37,10 @@
 
 ```
 Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
-Production  Стабили-  Расшире-  Тулинг    Prezenta-  Принятие
-ready        зация     ние       (CLI-     ция        и growth
-(~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo
-                                (~3 нед.)  (~2 нед.)
+Production  Стабили-  Расшире-  Тулинг    Prezenta-  Convention
+ready        зация     ние       (CLI-     ция        Discovery
+(~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo     и adoption
+                                (~3 нед.)  (~2 нед.)  (~4 нед.)
 ```
 
 ---
@@ -480,20 +481,245 @@ ready        зация     ние       (CLI-     ция        и growth
 
 ---
 
-## Phase 5 — Верификация и принятие
+## Phase 5 — Convention Discovery
 
-**Цель:** GigaTest принят реальными пользователями. Итеративное улучшение по обратной связи.
+**Цель:** Автоматическое обнаружение и генерация кастомных конвенций проекта. GigaTest пишет тесты в стиле КОНКРЕТНОЙ команды, а не "по общим правилам".
 
-**Зависимость:** Phase 0–1 завершены.
+**Зависимость:** Phase 4 завершена. W1-W10 стабильны.
 
-### Активности
+**Killer Feature:** Project-Aware Conventions — GigaTest не просто stack-aware, он project-aware.
 
-1. **Первый пилотный пользователь** — onboarding одного разработчика, наблюдение за процессом
-2. **Сбор feedback** — что непонятно, где блокировки, что лишнее
-3. **Итерация backlog** — обновление `backlog.yaml` по результатам пилота
-4. **Повтор** — второй пользователь
+### Проблема
 
-**Exit condition:** North Star Metric ≥ 70% автономных сессий
+Сейчас GigaTest использует **статичные конвенции** в `context/` (testing-standards, react-testing, java-testing и т.д.), которые написаны одним автором и не отражают:
+
+- Реальные практики конкретной команды
+- Принятые паттерны тестирования (названия, структура, инструменты)
+- Запрещённые антипаттерны, выработанные со временем
+- Исторические решения в проекте
+
+**Pain point:** Тесты, сгенерированные GigaTest, выглядят "чужеродно" в проекте, требуют больше ревью-коррекций, разработчики меньше доверяют AI-тестам.
+
+**Почему вручную не решить:** Команды не пишут конвенции — некогда. Дрейф — конвенции меняются быстрее документации. Мета-проблема — просить описать конвенции = нарушение конвенции.
+
+### Архитектура решения
+
+```
+┌─────────────────┐
+│   SKILL:        │
+│   convention-   │  — Инструкция: как сканировать, что
+│   discovery     │    искать, как классифицировать
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   AGENT:        │
+│   convention-   │  — Агент-исследователь выполняет и генерирует
+│   discoverer    │    output
+└────────┬────────┘
+         │
+┌────────▼────────┐
+│   OUTPUT:       │
+│   .gigacode/    │  — Сгенерированный overlay
+│   conventions/  │    project-conventions.md
+└─────────────────┘
+```
+
+**Источники данных для обнаружения:**
+| Категория | Что ищем | Файлы-примеры |
+|-----------|----------|---------------|
+| Existing tests | Naming, structure, mocking, assertions | `*.test.ts`, `*Test.java`, `*_test.py` |
+| Config files | Framework, coverage thresholds, linting | `jest.config.*`, `pom.xml`, `pyproject.toml` |
+| Team docs | Code style, contribution, architecture | `CONTRIBUTING.md`, `CODE_STYLE.md`, `.github/` |
+| Source code | Error handling, naming, file organization | `src/**/*.ts`, `src/**/*.java` |
+
+### Layer Model
+
+```
+┌─────────────────────────────────────────────┐
+│           USER QUERY (prompt)               │  ← Самый высокий приоритет
+├─────────────────────────────────────────────┤
+│     CUSTOM CONVENTIONS (generated)          │  ← Специфика проекта
+├─────────────────────────────────────────────┤
+│     STACK OVERLAY (context/react-testing.md)│  ← Специфика стека
+├─────────────────────────────────────────────┤
+│     TESTING STANDARDS (base)                │  ← Базовые принципы
+└─────────────────────────────────────────────┘
+```
+
+Полная техническая спецификация: [`IMPLEMENTATION-SPEC.md` §12](IMPLEMENTATION-SPEC.md).
+
+### Пользовательский workflow
+
+**Primary Flow: Первый запуск**
+```
+$ /discover-conventions
+[AGENT] scanning test files → config files → team docs → source patterns...
+[AGENT] conventions saved to .gigacode/conventions/project-conventions.md
+[AGENT] 47 conventions discovered: 12 naming, 5 mocking, 8 forbidden, 22 structure
+
+Следующий запуск /audit-tests будет использовать эти конвенции.
+```
+
+**Secondary Flow: Использование**
+```
+$ /audit-tests
+[AGENT] loaded conventions from .gigacode/conventions/project-conventions.md
+[AGENT] convention layer: 47 rules applied
+```
+
+**Edge cases:** Нет тестов → fallback на source code + configs. Конфликт → majority rule + human override. Повторный запуск → refresh с diff.
+
+### P5-022: Convention Discovery Skill Core
+
+**Гэп:** GigaTest использует статичные конвенции в `context/`, которые не отражают практики конкретной команды.
+
+**Action:**
+1. Создать `skills/convention-discovery/SKILL.md`
+2. Определить пошаговый алгоритм сканирования:
+   - Existing tests → naming, structure, mocking, assertions
+   - Config files → framework, coverage thresholds, linting rules
+   - Team docs → CONTRIBUTING, CODE_STYLE, ARCHITECTURE
+   - Source code → error handling, naming, file organization
+3. Определить категории анализа и формат выходного файла
+4. Описать exit conditions: когда остановиться и генерировать overlay
+
+**Acceptance criteria:**
+- [ ] `skills/convention-discovery/SKILL.md` существует с валидным front-matter
+- [ ] Описывает пошаговый алгоритм сканирования
+- [ ] Содержит категории: existing tests, config files, team docs, code patterns
+- [ ] Определяет when to stop discovery и generate overlay
+- [ ] Содержит Exit Conditions раздел
+
+**Effort:** M (4–6 часов)
+
+---
+
+### P5-023: Convention Overlay Schema
+
+**Action:**
+1. Создать JSON Schema `skills/convention-discovery/convention-overlay-schema.json`
+2. Схема включает: metadata, conventions, forbidden_patterns, team_notes, validation_rules
+3. Использовать `additionalProperties: false`, strict validation
+
+**Acceptance criteria:**
+- [ ] Схема валидируется по JSON Schema draft-07
+- [ ] Пример валидного overlay проходит валидацию через `tools/validate-state.js`
+- [ ] Поля соответствуют структуре из PHASE-5-CONVENTION-DISCOVERY.md §7
+
+**Effort:** S (2–3 часа)
+
+---
+
+### P5-024: Convention Discovery Agent
+
+**Action:**
+1. Создать `agents/convention-discoverer.md` по стандартной структуре
+2. Front-matter: name, description, tools
+3. Primary Failure Modes: 5–8 антипаттернов
+4. Rules: минимум 4, ссылка на convention-discovery skill
+5. Required Output: `.gigacode/conventions/project-conventions.md`
+
+**Acceptance criteria:**
+- [ ] `agents/convention-discoverer.md` существует с валидным front-matter
+- [ ] Содержит failure modes и recovery strategies
+- [ ] Использует `@./skills/convention-discovery/SKILL.md`
+- [ ] Описывает output format и путь сохранения
+
+**Effort:** M (4–6 часов)
+
+---
+
+### P5-025: Convention Loading Protocol (W11)
+
+**Action:**
+1. Добавить в `agent-workflow-core/SKILL.md` раздел W11: Convention Loading Protocol
+2. Алгоритм при старте сессии:
+   - Проверить `.gigacode/conventions/project-conventions.md`
+   - Если найден → загрузить как priority overlay
+   - Если нет → fallback на stack overlay из `context/`
+   - Логировать: `[AGENT] loaded conventions from <path>` или `[AGENT] no project conventions`
+3. Layer Model: custom conventions > stack overlay > testing-standards
+
+**Acceptance criteria:**
+- [ ] W11 добавлен в agent-workflow-core/SKILL.md
+- [ ] Приоритет слоёв документирован
+- [ ] Logging присутствует
+- [ ] Fallback работает
+
+**Effort:** S (2–3 часа)
+
+---
+
+### P5-026: Convention Review Skill
+
+**Action:**
+1. Создать `skills/convention-review/SKILL.md`
+2. Human-in-the-loop review flow: approve/reject/revise
+3. Validation checklist для сгенерированных конвенций
+4. Convention versioning при изменениях
+
+**Acceptance criteria:**
+- [ ] `skills/convention-review/SKILL.md` существует
+- [ ] Описывает human-in-the-loop review flow
+- [ ] Содержит validation checklist
+- [ ] Поддерживает approve/reject/revise workflow
+
+**Effort:** S (2–3 часа)
+
+---
+
+### P5-027: Document `docs/CONVENTION-DISCOVERY.md`
+
+**Action:**
+1. Создать пользователь-документацию
+2. Quick start: как запустить discovery в проекте (≤ 5 шагов)
+3. Что делает агент и что создаёт
+4. Как использовать generated conventions при написании тестов
+5. Как обновлять conventions при изменении проекта
+6. Примеры из реальных проектов (минимум 2)
+7. FAQ: что если конвенций нет? что если конфликтуют?
+
+**Acceptance criteria:**
+- [ ] `docs/CONVENTION-DISCOVERY.md` существует
+- [ ] Quick start ≤ 5 шагов
+- [ ] Содержит минимум 2 примера usage
+- [ ] FAQ с минимум 5 question-answer
+- [ ] Покрывает edge cases: empty project, conventions conflict
+
+**Effort:** M (4–6 часов)
+
+**Phase 5 Exit Metric:** Convention discovery проходит end-to-end: scan → generate → validate → use
+
+---
+
+### Риски и митигации
+
+| Риск | Вероятность | Влияние | Митигация |
+|------|------------|---------|-----------|
+| Нет существующих тестов → нечего анализировать | Средняя | Низкое | Fallback на source code + configs |
+| Конфликт generated conventions с существующим overlay | Низкая | Среднее | Custom convention wins + logging |
+| Generated conventions неполные | Высокая | Среднее | Human-in-the-loop: разработчик редактирует |
+| Сканирование большого проекта → timeout | Средняя | Среднее | Batch-процессинг, ограничение глубины |
+| Токен-лимит LLM | Средняя | Высокое | Batch по 20–30 файлов, grep-фильтр для больших проектов |
+
+### Feasibility: Cost Estimates
+
+Для типичного проекта (~50 тест + 20 source + 10 config/docs):
+- Scan & Read: 30–60 сек (чтение ФС)
+- Analyze: 2–3 мин (3 LLM-запроса по ~15K input)
+- Generate: 1–2 мин (1 LLM-запрос ~8K output)
+- **Итого:** ~5–8 мин, ~65K input / ~13K output
+
+**Benchmarks по размеру проекта:**
+
+| Размер | Файлов | LLM-запросов | Время | Токены |
+|--------|--------|--------------|-------|--------|
+| Маленький (≤20) | ~20 | 2 | 2–3 мин | ~20K |
+| Средний (20–100) | ~50 | 4 | 5–8 мин | ~65K |
+| Большой (100–500) | ~150 | 8 | 8–12 мин | ~120K |
+| Очень большой (>500) | ~500 | 15+ | 12–20 мин | ~200K+ |
+
+**Сравнение с аналогами:** Cursor ❌, Copilot ❌, Cline/Roo partially ✅, **GigaTest — первый полный AI-тестовый convention discovery.**
 
 ---
 
@@ -523,10 +749,16 @@ ready        зация     ние       (CLI-     ция        и growth
 | P4-019 | Demo script | 4 | P2 | M | — |
 | P4-020 | Comparison doc | 4 | P2 | S | — |
 | P4-021 | Метрики adoption | 4 | P2 | XS | — |
+| P5-022 | Convention Discovery Skill Core | 5 | P1 | M | Convention |
+| P5-023 | Convention Overlay Schema | 5 | P1 | S | Convention |
+| P5-024 | Convention Discovery Agent | 5 | P1 | M | Convention |
+| P5-025 | Convention Loading Protocol (W11) | 5 | P2 | S | Convention |
+| P5-026 | Convention Review Skill | 5 | P2 | S | Convention |
+| P5-027 | docs/CONVENTION-DISCOVERY.md | 5 | P2 | M | Convention |
 | BRIDGE-001 | Уровень 1: Testing Reminder | Bridge | P2 | XS | — |
 | BRIDGE-002 | Уровень 2: Cross-workflow Trigger | Bridge | P2 | S | — |
 | BRIDGE-003 | Уровень 3: Standards sync | Bridge | P2 | XS | — |
-| **Итого:** | **24 задачи** | | | | |
+| **Итого:** | **30 задач** | | | | |
 
 **Effort:** XS = 1–2ч, S = 2–4ч, M = 4–6ч, L = 6–10ч
 
@@ -541,4 +773,5 @@ ready        зация     ние       (CLI-     ция        и growth
 | После Phase 1 | ≥ 4.4/5 | Первый onboarded пользователь |
 | После Phase 2 | ≥ 4.7/5 | 4+ стека + overlay discovery + template spec |
 | После Phase 3 | 4.9/5 | CLI-утилиты работают локально |
-| После Phase 4–5 | 5.0/5 | North Star Metric ≥ 70% |
+| После Phase 4 | 4.9/5 | Demo + comparison + metrics готовы |
+| После Phase 5 | 5.0/5 | Convention discovery end-to-end: scan → generate → validate → use |
