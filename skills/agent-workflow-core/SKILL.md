@@ -233,6 +233,7 @@ description: Core principles of planning, iterability, and state management for 
 | test-reviewer | `tests-review` |
 | test-strategist | `tests-strategy` |
 | test-verifier | `tests-verify` |
+| convention-discoverer | `conventions` |
 
 ---
 
@@ -478,6 +479,76 @@ State Discovery — это процесс автоконфигурации аг�
 
 **Правило:** Если `agent-state.json` invalid -- не продолжать, сообщить об ошибке.
 
+---
+
+## W11. Convention Loading Protocol
+
+### W11.1 Назначение
+
+Convention Loading — это процесс загрузки кастомных конвенций проекта, обнаруженных агентом `convention-discoverer`.
+Конвенции проекта имеют приоритет над базовыми stack overlays и `testing-standards.md`.
+
+### W11.2 Когда вызывается
+
+W11 вызывается **ПОСЛЕ** W10 (stack detection) и **ДО** начала работы агента.
+
+### W11.3 Algorithm
+
+При подготовке к тестовой сессии каждый агент выполняет:
+
+```
+1. Check: .gigacode/conventions/project-conventions.json существует?
+   ├─ ДА → Загрузить, валидировать по convention-overlay-schema.json
+   │        Если валидация не прошла → warning, fallback к шагу 2
+   │        Если валидация прошла → [AGENT] loaded conventions from .gigacode/conventions/project-conventions.json
+   │                                [AGENT] applying custom conventions (priority: custom > stack > base)
+   │        Перейти к началу работы.
+   └─ НЕТ → Перейти к шагу 2
+
+2. Check: .gigacode/conventions/project-conventions.md существует?
+   ├─ ДА → Загрузить как human-readable overlay
+   │        [AGENT] loaded conventions from .gigacode/conventions/project-conventions.md
+   │        Перейти к началу работы.
+   └─ НЕТ → Перейти к шагу 3
+
+3. Загрузить stack overlay из context/ (W10.4)
+   [AGENT] no project conventions found. Using <stack>-testing.md base conventions
+   Перейти к началу работы.
+```
+
+### W11.4 Layer Model
+
+При наложении конвенций применяется модель приоритетов:
+
+```
+custom (project-conventions) > stack overlay (context/<stack>-testing.md) > testing-standards.md
+```
+
+**Правила разрешения конфликтов:**
+
+1. Конвенции из `project-conventions.json` **переопределяют** stack overlay при конфликте.
+2. Stack overlay **переопределяет** `testing-standards.md` при конфликте.
+3. Если кастомная конвенция нарушает базовые принципы `testing-standards.md` §1 (общие принципы) — агент **предупреждает**, но **НЕ** применяет нарушение. Это логируется:
+   ```
+   [AGENT] WARNING: custom convention conflicts with testing-standards §<section>: <brief description>. Skipping.
+   ```
+
+### W11.5 Logging
+
+Каждый агент логирует применение конвенций:
+
+```
+[AGENT] conventions: loaded custom conventions from .gigacode/conventions/project-conventions.json
+[AGENT] conventions: priority = custom > stack overlay > testing-standards
+[AGENT] conventions: <N> naming, <M> mocking, <K> forbidden rules loaded
+```
+
+Или при fallback:
+
+```
+[AGENT] conventions: no project conventions found. Using context/<stack>-testing.md base conventions
+```
+
 ## Exit Conditions
 
 - [ ] `agent-state.json` сохранён и валидируется по `agent-state-schema.json`
@@ -492,9 +563,10 @@ State Discovery — это процесс автоконфигурации аг�
 
 ## 🔄 Версионирование
 
-**Skill Version**: 2.4 (gigatest)
+**Skill Version**: 2.5 (gigatest)
 **Domain**: Agent orchestration & workflow management
-**Last Updated**: 2026-04-16
+**Last Updated**: 2026-04-19
 
 **История изменений для gigatest**:
+- v2.5 (gigatest): Добавлен W11 — Convention Loading Protocol. Layer model (custom > stack > base), conflict resolution, logging.
 - v2.4 (gigatest): Адаптация для тестового workflow. Имена файлов: `agent-state.json` + `test-plan.md`. Тестово-специфичные поля в схеме. Типы агентов заменены на тестовые. Режимы сессии: `audit`, `implementation`, `review`, `verification`. Валидация по `agent-state-schema.json` и `test-plan-state-schema.json`.

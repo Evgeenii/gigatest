@@ -1,10 +1,9 @@
 # BLOCK-2-GIGATEST-GROWTH.md — Стратегия развития GigaTest
 
-> Версия: 3.0 | Дата: 2026-04-19
+> Версия: 4.0 | Дата: 2026-04-19
 > Предыдущая версия: 2.5 (2026-04-18)
 >
-> **Изменения v3.0:** Добавлен Phase 6 (Architecture & Prompt Quality) на основе
-> ARCHITECTURE-SPEC.md и PROMPT-QUALITY-SPEC.md. Обновлены обзор фаз, сводная таблица.
+> **Изменения v4.0:** Phase 5 (Convention Discovery) завершена. Добавлены W11, convention-discovery, convention-review, convention-discoverer agent, docs/CONVENTION-DISCOVERY.md.
 
 ---
 

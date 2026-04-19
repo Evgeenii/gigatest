@@ -5,8 +5,8 @@
 # Maturity matrix: READINESS-MATRIX.md
 
 meta:
-  version: "4.2"
-  updated: "2026-04-19T14:00:00Z"
+  version: "4.3"
+  updated: "2026-04-19T12:00:00Z"
   total_items: 49
   readiness_score: "5.0/5"
   north_star: "≥70% автономных сессий без эскалации к человеку"
@@ -275,7 +275,8 @@ phase-5:
     - id: P5-022
       title: "Создать skill convention-discovery (skills/convention-discovery/SKILL.md)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-discovery/SKILL.md
       action: >
@@ -299,7 +300,8 @@ phase-5:
     - id: P5-023
       title: "Convention overlay output format (schema)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-discovery/convention-overlay-schema.json
       action: >
@@ -321,7 +323,8 @@ phase-5:
     - id: P5-024
       title: "Convention Discovery Agent (agents/convention-discoverer.md)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: agents/convention-discoverer.md
       action: >
@@ -344,7 +347,8 @@ phase-5:
     - id: P5-025
       title: "Integration: Loading discovered conventions in test workflow"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/agent-workflow-core/SKILL.md
       action: >
@@ -366,7 +370,8 @@ phase-5:
     - id: P5-026
       title: "Convention validation and review flow"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-review/SKILL.md
       action: >
@@ -388,7 +393,8 @@ phase-5:
     - id: P5-027
       title: "Document: docs/CONVENTION-DISCOVERY.md"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: docs/CONVENTION-DISCOVERY.md
       action: >

@@ -1,11 +1,11 @@
 # Strategy — Навигация
 
-> Версия: 1.7 | Дата: 2026-04-19
+> Версия: 1.8 | Дата: 2026-04-19
 >
-> **Изменения v1.7:** Добавлены два новых спецификационных документа:
-> `ARCHITECTURE-SPEC.md` (архитектурный аудит: структурные риски, edge cases, 6 противоречий, P0–P2 задачи)
-> и `PROMPT-QUALITY-SPEC.md` (линвистический аудит промтов: consistency, DRY-volations, precision, conciseness, P0–P2 задачи).
-> Обновлена таблица файлов и порядок чтения.
+> **Изменения v1.8:** Phase 5 (Convention Discovery) завершена. Новые файлы:
+> `skills/convention-discovery/SKILL.md`, `skills/convention-discovery/convention-overlay-schema.json`,
+> `skills/convention-review/SKILL.md`, `agents/convention-discoverer.md`,
+> W11 в `skills/agent-workflow-core/SKILL.md`, `docs/CONVENTION-DISCOVERY.md`.
 >
 > **Назначение:** Индекс стратегических документов GigaCraft ↔ GigaTest.
 > Все файлы — human-readable Markdown. Machine-readable бэклог — `backlog.yaml`.
