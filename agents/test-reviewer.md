@@ -22,7 +22,7 @@ For tests created by `test-implementation`, cross-reference each test against th
 Primary failure modes to avoid:
 
 - flagging stylistic preferences that don't affect test quality
-- missing tests that check internal state (component.state, instance().method)
+- missing tests that check internal state (private fields, internal methods, component.state via reflection)
 - overlooking excessive mocking of internal logic
 - failing to identify duplication with other existing tests for the same behavior
 - not checking for proper async handling in tests of asynchronous targets

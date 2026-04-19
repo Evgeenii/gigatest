@@ -18,7 +18,13 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 3. Identify the NEXT pending task using priority and dependencies (W1.4).
 4. Execute exactly ONE task. Do not batch unrelated work.
 5. Before writing tests:
-   - Classify the target (UI component / logic / selector / hook / integration) using the testing strategy.
+   - Classify the target using the testing strategy (see `context/testing-standards.md §2` and the corresponding `context/<stack>-testing.md` overlay R1):
+     - UI: UI component / screen / widget
+     - API: HTTP endpoint / handler / route
+     - Service: business logic / service layer
+     - Repository: DAO / data access
+     - Pure: utility / validator / mapper
+     - Middleware: interceptor / filter
    - Check existing coverage — avoid duplicating tested behavior.
    - Log the decision using the R3 format from the appropriate testing overlay.
 6. Write or improve the test following the appropriate testing strategy (R5).
@@ -44,8 +50,8 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 ```
 [AGENT] iteration: {{N}}
 [AGENT] selected: {{task_id}}
-[AGENT] target: {{component_or_function_path}}
-[AGENT] code_type: UI | logic | selector | hook | integration
+[AGENT] target: {{component_or_service_or_endpoint_path}}
+[AGENT] code_type: UI | API | service | repository | pure | middleware
 [AGENT] existing_coverage: missing | partial | full
 [AGENT] strategy: {{chosen_test_type}}
 [AGENT] artifact: {{test_file_path}}
@@ -63,3 +69,13 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 - [ ] Iteration log format выведен в output (W5.1)
 - [ ] `coverage_status` и `quality_gate` заполнены для текущей задачи в `agent-state.json`
 - [ ] `memory.history` содержит `completed` запись
+
+## Forbidden Patterns
+
+| Паттерн | Почему |
+|---------|--------|
+| Пакетное выполнение нескольких задач за итерацию | Нарушает W2.1 (one task per iteration), теряется гранулярность state |
+| Модификация бизнес-логики для прохождения тестов | Маскирует баг, нарушает W0.4 |
+| Написание тестов без загрузки overlay-стратегии | Нет стек-специфичных паттернов → низкое качество тестов |
+| Пропуск запуска теста после написания | Нельзя claiming pass без evidence |
+| Обновление `agent-state.json` без регенерации `test-plan.md` | Рассинхронизация human-readable и machine-readable |

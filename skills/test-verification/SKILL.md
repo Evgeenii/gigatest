@@ -75,3 +75,13 @@ Before any success claim:
 - [ ] Если verification failed — failure reported plainly, no completion claimed
 - [ ] `test-plan.md` синхронизирован с `agent-state.json` (W8.3)
 - [ ] `memory.history` содержит записи `started` и `completed` (verification stage)
+
+## Forbidden Patterns
+
+| Паттерн | Почему |
+|---------|--------|
+| Заявление об успехе без запуска тестов | Нарушает Iron Law — нет evidence, нет completion |
+| Использование старого вывода тестов как evidence | Изменения могли сломать тесты, нужен свежий запуск |
+| Принятие "should pass" / "probably works" как результата | Hedging = отсутствие реальной проверки |
+| Пропуск проверки `agent-state.json` перед верификацией | Неполный plan = неполная верификация |
+| Доверие отчёту суб-агента без независимой проверки | Суб-агент может ошибаться, нужна независимая валидация |

@@ -1,12 +1,16 @@
 # READINESS-MATRIX.md — Матрица готовности GigaTest
 
-> Версия: 4.0 | Дата: 2026-04-18
-> Предыдущая версия: 3.1 (2026-04-18, до Phase 3)
+> Версия: 4.2 | Дата: 2026-04-19
+> Предыдущая версия: 4.1 (2026-04-18, до Phase 5)
 >
-> **Назначение:** Объективная оценка текущего состояния GigaTest по всем измерениям.
+> **Использование:** Объективная оценка текущего состояния GigaTest по всем измерениям.
 > Служит точкой принятия решений и приоритизации.
 >
 > **Методология:** 5-балльная шкала. 1 = отсутствует / критичный гэп. 5 = production-ready.
+>
+> **Изменения v4.2:** `testing-standards.md` стал по-настоящему stack-agnostic (был React-центричен).
+> React-specific forbidden patterns перенесены в `react-testing.md §R8`.
+> Skills и агенты адаптированы: test-audit, test-review, test-implementation, test-auditor, test-reviewer.
 
 ---
 
@@ -18,12 +22,27 @@
 | State Management | 4.9 / 5 | +0.1 | 🟢 Production-ready |
 | Агентная система | 4.9 / 5 | — | 🟢 Production-ready |
 | Skills / Навыки | 5.0 / 5 | — | 🟢 Production-ready |
-| Stack Coverage | 4.7 / 5 | — | 🟢 Growing |
+| Stack Coverage | 4.8 / 5 | +0.1 | 🟢 Growing |
 | Developer Experience | 4.9 / 5 | +0.2 | 🟢 Production-ready |
-| Документация | 4.5 / 5 | — | 🟢 Production-ready |
+| Документация | 4.6 / 5 | +0.1 | 🟢 Production-ready |
 | Интеграция (мост) | 1.5 / 5 | — | 🔴 Не начато |
 | Тулинг | 4.5 / 5 | +3.5 | 🟢 New (Phase 3 complete) |
-| **ИТОГО** | **4.9 / 5** | **+0.2** | 🟢 **Stable (Phase 3 complete)** |
+| Convention Discovery | 0.5 / 5 | Novum | 🔴 Planned (Phase 5 — стратегия готова, имплементация pending) |
+| **ИТОГО** | **4.7 / 5** | **-0.2** | 🟡 **Stable (Phase 5 в бэклоге)** |
+
+---
+
+## Исправление архитектурных ошибок v2.0 (2026-04-19) ✅
+
+| ID | Гэп | Подтверждение |
+|----|-----|---------------|
+| ARCH-1 | `testing-standards.md` был React-центричен (forbidden patterns: `act()`, `wrapper.instance()`, `component.state`, таблица «Test Types» включала «Hook behavior test») | ✅ Переписан на stack-agnostic — §1–5 применимы к любому стеку |
+| ARCH-2 | `skills/test-audit/SKILL.md` Quality Checklist — React-центричен (`userEvent`, `findBy*`, `component`, `hook`) | ✅ Обновлён: базовый checklist stack-agnostic, stack-специфика — в overlay |
+| ARCH-3 | `skills/test-review/SKILL.md` Forbidden Patterns — React-specific только | ✅ Разделены: любой стек vs React-специфичные |
+| ARCH-4 | `skills/test-implementation/SKILL.md` классификация целей — «UI component / logic / selector / hook» (React) | ✅ Обновлена: UI / API / service / repository / pure / middleware |
+| ARCH-5 | `context/react-testing.md` нет собственных forbidden patterns — они были в testing-standards | ✅ Добавлен R8 React-Specific Forbidden Patterns |
+| ARCH-6 | `agents/test-auditor.md` Rules — React-центричен | ✅ Обновлён: UI + backend эквиваленты |
+| ARCH-7 | `agents/test-reviewer.md` failure modes — «component.state, instance().method» | ✅ Обновлён: stack-agnostic формулировка |
 
 ---
 
@@ -253,6 +272,19 @@
 
 ---
 
+## Новые гэпы Phase 5 (Planned)
+
+| ID | Severity | Компонент | Описание | Блокирует | Фаза |
+|----|----------|-----------|----------|-----------|------|
+| P5-022 | P1 | skills/ | Нет convention-discovery SKILL.md | Автоматическое обнаружение конвенций | Phase 5 |
+| P5-023 | P1 | schema | Нет convention-overlay-schema.json | Валидация output discovery | Phase 5 |
+| P5-024 | P1 | agents/ | Нет convention-discoverer агента | Исполнение workflow | Phase 5 |
+| P5-025 | P2 | workflow | Нет W11 Convention Loading Protocol | Использование custom conventions | Phase 5 |
+| P5-026 | P2 | skills/ | Нет convention-review SKILL.md | Human-in-the-loop validation | Phase 5 |
+| P5-027 | P2 | docs/ | Нет docs/CONVENTION-DISCOVERY.md | Onboarding на новую фичу | Phase 5 |
+
+---
+
 ## Дорожная карта готовности
 
 ```
@@ -260,8 +292,8 @@
 После Phase 0:       4.0/5 ████████████░░░░ Production-ready (core)
 После Phase 1:       4.4/5 █████████████░░░ Stable ✅
 После Phase 2:       4.7/5 ██████████████░░ Growing
-ТЕКУЩЕЕ (после Phase 3):  4.9/5 ███████████████░ Stable+ (Tooling complete)
-После Phase 4+Bridge: 5.0/5 ████████████████ Enterprise-ready
+ТЕКУЩЕЕ (после Phase 4):    4.9/5 ███████████████░ Stable+ (All core phases complete)
+После Phase 5:           5.0/5 ████████████████ Convention Discovery + Project-Aware
 ```
 
 ---

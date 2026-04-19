@@ -1,5 +1,7 @@
 # Java Testing Overlay
 
+> Версия: 1.0 | Дата: 2026-04-18
+
 Stack: Java + JUnit 5 + Mockito + Spring Boot Test
 
 Use this overlay when the project uses Java/Spring Boot. Load it alongside `testing-standards.md`.

@@ -1,9 +1,10 @@
 # IMPLEMENTATION-SPEC.md — Спецификация имплементации для агентов
 
-> Версия: 1.1 | Дата: 2026-04-18
-> Предыдущая версия: 1.0 (2026-04-18)
+> Версия: 1.2 | Дата: 2026-04-18
+> Предыдущая версия: 1.1 (2026-04-18)
 >
-> **Изменения v1.1:** Phase 3 переименована из «CI/CD» в «Тулинг», удалён P3-017 (pre-commit hook), обновлены конвенции тулинга §9.
+> **Изменения v1.2:** Добавлены Phase 5 паттерны (§10), конвенции для convention files (§2, §12),
+> предложен W11 Convention Loading Protocol.
 >
 > **Назначение:** Software Design Document (SDD) для агентной реализации задач GigaTest.
 > Описывает «КАК» — технические решения, конвенции, паттерны имплементации.
@@ -14,7 +15,7 @@
 > - [`VISION.md`](VISION.md) — ЧТО и ЗАЧЕМ
 > - [`backlog.yaml`](backlog.yaml) — КАКИЕ задачи
 > - [`BLOCK-2-GIGATEST-GROWTH.md`](BLOCK-2-GIGATEST-GROWTH.md) — КОГДА
-> - [`GIGATEST-IMPROVEMENTS-ANALYSIS.md`](GIGATEST-IMPROVEMENTS-ANALYSIS.md) — ПОЧЕМУ
+> - [`GIGATEST-IMPROVEMENTS-ANALYSIS.md`](archive/ARCHIVE-GIGATEST-IMPROVEMENTS-ANALYSIS.md) — ПОЧЕМУ
 
 ---
 
@@ -31,6 +32,7 @@
 9. [Конвенции тулинга](#9-конвенции-тулинга)
 10. [Паттерны реализации по фазам](#10-паттерны-реализации-по-фазам)
 11. [Чек-лист готовности задачи](#11-чек-лист-готовности-задачи)
+12. [Конвенции Convention Discovery](#12-конвенции-convention-discovery)
 
 ---
 
@@ -155,7 +157,8 @@ gigatest-0.1.0/
 │   ├── ONBOARDING.md          ← Phase 1
 │   ├── DEMO.md                ← Phase 4
 │   ├── COMPARISON.md          ← Phase 4
-│   └── METRICS.md             ← Phase 4
+│   ├── METRICS.md             ← Phase 4
+│   └── TEMPLATE-SYNTAX.md     ← Спецификация Handlebars-like синтаксиса шаблонов
 │
 ├── strategy/                  ← Стратегические документы
 │   ├── README.md
@@ -549,6 +552,22 @@ plans/tests-e2e-example/
 | P4-020: COMPARISON.md | Таблица vs 3+ альтернатив, все killer features |
 | P4-021: METRICS.md | 5+ метрик, источники данных, формулы |
 
+### Phase 5 — Convention Discovery
+
+| Задача | Паттерн |
+|--------|---------|
+| P5-022: convention-discovery SKILL.md | Создать `skills/convention-discovery/SKILL.md` с 4 фазами: Scan → Analyze → Extract → Generate. Использовать конвенции из §12 для output format |
+| P5-023: convention-overlay-schema.json | Создать JSON Schema в `skills/convention-discovery/`. Структура по §12.1, `additionalProperties: false` везде |
+| P5-024: convention-discoverer agent | Скопировать структуру из test-auditor.md, заменить failure modes/rules. Output: `.gigacode/conventions/project-conventions.md` |
+| P5-025: W11 Convention Loading | Добавить W11 в agent-workflow-core/SKILL.md. Алгоритм: check → load → fallback → log. Layer model по §6.2 |
+| P5-026: convention-review SKILL.md | Создать `skills/convention-review/SKILL.md`. Human-in-the-loop: approve/reject/revise workflow. Checklist по §12.2 |
+| P5-027: docs/CONVENTION-DISCOVERY.md | Quick start ≤ 5 шагов + 2 примера + FAQ 5+ вопросов. Edge cases: empty project, conflicts |
+
+**Порядок выполнения:** P5-022 → P5-023 → P5-024 → одновременно P5-025 + P5-026 → P5-027.
+
+> Зависимость: P5-023 требует P5-022 (schema следует за skill), P5-024 требует P5-023 (agent генерирует по schema).
+> P5-025 (W11) требует стабильных W1-W10 и может идти параллельно с P5-024.
+
 ### Bridge — Мост
 
 | Задача | Паттерн |
@@ -595,6 +614,149 @@ plans/tests-e2e-example/
 - [ ] `$ref` composition используется для общих полей
 - [ ] Пример `plans/tests-audit-example/agent-state.json` валидируется
 - [ ] Enum `agent.type` синхронизирован с `agents/`
+
+---
+
+## 12. Конвенции Convention Discovery
+
+### 12.1 Convention Overlay Schema
+
+JSON Schema `skills/convention-discovery/convention-overlay-schema.json` должна содержать:
+
+```json
+{
+  "type": "object",
+  "required": ["metadata", "conventions"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["generated_at", "scanned_files", "base_stack"],
+      "additionalProperties": false,
+      "properties": {
+        "generated_at": {"type": "string", "format": "date-time"},
+        "scanned_files": {"type": "integer"},
+        "scanned_modules": {"type": "integer"},
+        "base_stack": {"type": "string"},
+        "version": {"type": "string"}
+      }
+    },
+    "conventions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stack_and_tools": {"type": "array", "items": {"type": "string"}},
+        "naming": {"type": "array", "items": {"type": "object",
+          "required": ["target", "pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "target": {"type": "string"},
+            "pattern": {"type": "string"},
+            "source": {"type": "string"}
+          }
+        }},
+        "test_structure": {"type": "array", "items": {"type": "string"}},
+        "mocking_rules": {"type": "array", "items": {"type": "object",
+          "required": ["target", "approach"],
+          "additionalProperties": false,
+          "properties": {
+            "target": {"type": "string"},
+            "approach": {"type": "string"}
+          }
+        }},
+        "forbidden_patterns": {"type": "array", "items": {"type": "object",
+          "required": ["pattern"],
+          "additionalProperties": false,
+          "properties": {
+            "pattern": {"type": "string"},
+            "reason": {"type": "string"},
+            "alternative": {"type": "string"}
+          }
+        }},
+        "team_notes": {"type": "array", "items": {"type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "note": {"type": "string"},
+            "source": {"type": "string"}
+          }
+        }}
+      }
+    }
+  }
+}
+```
+
+### 12.2 Convention Discovery Agent Format
+
+`agents/convention-discoverer.md` следует стандарту §4 с дополнениями:
+
+**Primary Failure Modes (обязательные минимум 5):**
+1. Генерация conventions без анализа существующих тестов (hallucinated conventions)
+2. Пропуск config files → неверное определение фреймворка
+3. Конфликт обнаруженных конвенций с базовыми testing-standards
+4. Перегенерация без сохранения истории (lost previous conventions)
+5. Сканирование всех файлов без лимита → timeout на большом проекте
+
+**Required Output:**
+- `.gigacode/conventions/project-conventions.md` (human-readable overlay)
+- `.gigacode/conventions/project-conventions.json` (machine-readable, если нужна schema validation)
+
+### 12.3 Project Conventions File Format
+
+`.gigacode/conventions/project-conventions.md` — human-readable overlay:
+
+```markdown
+# Project Testing Conventions — <Project Name>
+
+> Сгенерировано GigaTest Convention Discovery | Дата: YYYY-MM-DD
+> Сканировано: N тестовых файлов, M модулей исходного кода
+> Базовый стек: <reference к stack overlay>
+> Версия: 1.0
+
+---
+
+## 1. Stack & Tools
+## 2. Naming Conventions
+## 3. Test Structure
+## 4. Mocking Rules (Project-Specific)
+## 5. Forbidden Patterns
+## 6. Team Notes
+## 7. Validation Checklist
+```
+
+### 12.4 Convention Review Checklist
+
+Для `skills/convention-review/SKILL.md` — минимальная validation checklist:
+
+- [ ] Все обнаруженные конвенции имеют источник (файл/паттерн)
+- [ ] Нет конфликта с testing-standards.md (base principles)
+- [ ] Forbidden patterns имеют альтернативы (не просто "нельзя делать X")
+- [ ] Naming conventions покрывают файлы, describe-блоков, it-блоков
+- [ ] Mocking rules покрывают: API, БД, внешние сервисы, redux/store
+- [ ] Team notes имеют source_file ссылку (не голословные)
+
+### 12.5 W11 Convention Loading Protocol (Proposed)
+
+Расширение `agent-workflow-core/SKILL.md` — новый W-раздел:
+
+```
+W11. Convention Loading Protocol
+
+При старте тестовой сессии каждый агент:
+
+1. Проверяет: .gigacode/conventions/project-conventions.md существует?
+   ├─ ДА → Загружает как priority overlay
+   │        [AGENT] loaded conventions from .gigacode/conventions/project-conventions.md
+   └─ НЕТ → Переход к шагу 2
+
+2. Загружает stack overlay из context/ (W10.4)
+   [AGENT] no project conventions found. Using <stack>-testing.md base conventions
+
+3. Применяет layer model: custom > stack overlay > testing-standards
+   Конвенции из project-conventions.md переопределяют stack overlay при конфликте.
+```
+
+**Правило:** W11 вызывается ПОСЛЕ W10 (stack detection) и ДО начала работы агента.
 
 ---
 

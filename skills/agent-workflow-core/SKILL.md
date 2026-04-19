@@ -373,7 +373,7 @@ description: Core principles of planning, iterability, and state management for 
 **Обязательные поля задачи:**
 - `id` — уникальный идентификатор
 - `type` — тип задачи (для тестов: всегда `test`)
-- `subtype` — подтип: `ui_test`, `unit_test`, `integration_test`, `hook_test`
+- `subtype` — подтип: `ui_test`, `unit_test`, `integration_test`, `hook_test` (React), `api_test` (backend)
 - `name` — человеко-читаемое название
 - `assigned_agent` — тип агента-исполнителя
 - `status` — `pending`, `in_progress`, `done`, `skipped`, `blocked`

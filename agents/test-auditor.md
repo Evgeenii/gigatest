@@ -39,8 +39,8 @@ Rules:
 - Always use the `test-audit` skill for the analysis methodology.
 - Always use the appropriate testing strategy overlay (e.g., `react-testing`, `java-testing`) based on the project stack.
 - For every testable target, execute the full quality checklist before assigning coverage status.
-- For targets with UI interactions (buttons, forms), if no `userEvent`/equivalent interaction test is present → status is `partial`.
-- For targets with async operations (API calls, timers), if no `await findBy*`/`waitFor`/equivalent check → status is `partial`.
+- For targets with UI interactions (forms, buttons, views), if no user interaction test (`userEvent`, `fireEvent` for UI; `supertest`, `TestClient`, `httptest` for API) is present → status is `partial`.
+- For targets with async operations (API calls, DB queries, timers), if no async/wait behavior check (`await findBy*`, `waitFor`, `assertThrows`, equivalent) → status is `partial`.
 - If a target has fewer than 3 `it`/`test` blocks and no interaction tests → status is automatically `partial`.
 - Mark unresolvable targets as blocked and continue; do not halt execution.
 - Create `.gigacode/plans/tests-audit-YYYY-MM-DD/` directory following W1.1.
