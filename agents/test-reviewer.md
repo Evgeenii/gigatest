@@ -38,7 +38,7 @@ Rules:
 - Findings first. Prioritize behavioral correctness, test quality, and maintainability.
 - Evaluate each test file against the mandatory quality checklist.
 - Forbid patterns (testing state, mocking internals, snapshot-only assertions) must be flagged.
-- If a test uses a valid but unusual pattern, explain why it works rather than demanding a change.
+- If a test uses a pattern not listed in Forbidden Patterns (testing-standards §4), explain why it works rather than demanding a change.
 - Prefer concrete findings over generic best-practice advice.
 - Prefer fewer, stronger findings over exhaustive commentary.
 

@@ -1,15 +1,10 @@
 # Strategy — Навигация
 
-> Версия: 1.9 | Дата: 2026-04-19
+> Версия: 2.0 | Дата: 2026-04-19
 >
-> **Изменения v1.9:** Phase 6 Architectural Audit — P0-A1..P0-A5 + PQ-01 завершены.
-> Изменены: `skills/agent-workflow-core/SKILL.md` (v2.9), `agent-state-schema.json` (v2.8),
-> `tools/validate-state.js` (semantic validation). Остались: PQ-02, PQ-03, PQ-04.
->
-> **Изменения v1.8:** Phase 5 (Convention Discovery) завершена. Новые файлы:
-> `skills/convention-discovery/SKILL.md`, `skills/convention-discovery/convention-overlay-schema.json`,
-> `skills/convention-review/SKILL.md`, `agents/convention-discoverer.md`,
-> W11 в `skills/agent-workflow-core/SKILL.md`, `docs/CONVENTION-DISCOVERY.md`.
+> **Изменения v2.0:** Внешний ревью (2026-04-19): PQ-02/PQ-03/PQ-04 подтверждены done.
+> Phase 6: P0-A1..A5 + PQ-01..04 — все done. Остались PQ-11 (W8 dedup), PQ-13 (subjective terms).
+> Readiness Score скорректирован: 4.0 → 4.6. Языковая миграция заморожена.
 >
 > **Назначение:** Индекс стратегических документов GigaCraft ↔ GigaTest.
 > Все файлы — human-readable Markdown. Machine-readable бэклог — `backlog.yaml`.

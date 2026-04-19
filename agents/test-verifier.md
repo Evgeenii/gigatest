@@ -40,7 +40,7 @@ Rules:
 - Load `agent-state.json` first — it is the source of truth for plan completeness.
 - Check that all `plan.items` have `status` of `done` or `skipped` (no `pending`, `in_progress`, or `blocked`).
 - Verify `plan.meta.progress_percent == 100`.
-- Prefer the narrowest useful verification first, then expand if task risk justifies it.
+- Start with the most specific verification for the claimed requirement, then expand if task risk justifies it.
 - Run the exact test command against the current workspace — do not assume previous results are valid.
 - Read the actual output and exit status instead of assuming the result.
 - If verification could not run, say that explicitly and report the remaining risk.

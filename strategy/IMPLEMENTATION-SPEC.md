@@ -1,10 +1,11 @@
 # IMPLEMENTATION-SPEC.md — Спецификация имплементации для агентов
 
-> Версия: 1.3 | Дата: 2026-04-19
-> Предыдущая версия: 1.2 (2026-04-18)
+> Версия: 1.4 | Дата: 2026-04-19
+> Предыдущая версия: 1.3 (2026-04-19)
 >
-> **Изменения v1.3:** Добавлен Phase 6 (§10.6) — Architecture & Prompt Quality реализации
-> на основе ARCHITECTURE-SPEC.md и PROMPT-QUALITY-SPEC.md. Обновлён §12 (ссылки).
+> **Изменения v1.4:** Внешний ревью подтвердил PQ-02/PQ-03/PQ-04 done.
+> Обновлены §10 (Phase 6 таблица) и §11 (чек-листы). Добавлены PQ-11/PQ-13.
+> Языковая миграция §10 заморожена.
 >
 > **Назначение:** Software Design Document (SDD) для агентной реализации задач GigaTest.
 > Описывает «КАК» — технические решения, конвенции, паттерны имплементации.
@@ -570,7 +571,7 @@ plans/tests-e2e-example/
 
 ### Phase 6 — Architecture & Prompt Quality
 
-**Статус:** ✅ P0-A1..P0-A5 + PQ-01..PQ-04 выполнены. PQ-10..PQ-17 — раунд 2 audit (новые P0/P1)
+**Статус:** ✅ P0-A1..P0-A5 + PQ-01..PQ-04 выполнены. Внешний ревью подтвердил. Остались: PQ-11 (P0), PQ-13 (P1).
 
 | Задача | Паттерн | Статус |
 |--------|---------|--------|
@@ -580,26 +581,27 @@ plans/tests-e2e-example/
 | P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards | ✅ done |
 | P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order, content_hash | ✅ done |
 | PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнено вместе | ✅ done |
-| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | ✅ done |
-| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | ✅ done |
-| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | ✅ done |
-| **PQ-10: agent-workflow-core split** | **Вынести W10/W11 в отдельные skills** | **pending** |
-| **PQ-11: W8 dedup** | **Заменить W8 ссылкой на test-plan-template** | **pending** |
-| **PQ-12: QWEN.md sync** | **Синхронизировать импортированный W8.4 с content_hash** | **pending** |
-| PQ-13: Subjective terms removal | Заменить narrow/unusual/narrowest на verifiable формулировки | pending |
-| PQ-14: test-review Forbidden DRY | Ссылка на testing-standards §4 вместо дублирования | pending |
-| PQ-15: R2/R3/R4.1 overlays DRY | Вынести общие правила в testing-standards §6 | pending |
-| PQ-16: W6 pre-flight DRY | agents/*.md → ссылка на agent-workflow-core W6 | pending |
-| PQ-17: R9 Common Pitfalls | Добавить к Java/JS overlays | pending |
+| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | ✅ done (подтверждено внешним ревью) |
+| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | ✅ done (подтверждено внешним ревью) |
+| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | ✅ done (подтверждено внешним ревью) |
+| PQ-10: agent-workflow-core split | Вынести W10/W11 в отдельные skills | 🟡 **отложено** (делать только при 800+ строках или жалобах) |
+| **PQ-11: W8 dedup** | **Заменить W8 ссылкой на test-plan-template** | 🟡 **рекомендовано** |
+| PQ-12: QWEN.md sync | Синхронизировать импортированный W8.4 с content_hash | 🟡 deferred |
+| **PQ-13: Subjective terms** | **Заменить narrow/unusual/narrowest на verifiable формулировки** | 🟡 **рекомендовано** |
+| PQ-14: test-review Forbidden DRY | Ссылка на testing-standards §4 вместо дублирования | deferred |
+| PQ-15: R2/R3/R4.1 overlays DRY | Вынести общие правила в testing-standards §6 | 🔴 deferred (большой рефакторинг) |
+| PQ-16: W6 pre-flight DRY | agents/*.md → ссылка на agent-workflow-core W6 | deferred |
+| PQ-17: R9 Common Pitfalls | Добавить к Java/JS overlays | 🔴 deferred |
 
-**Порядок выполнения PQ:** PQ-02 → PQ-03 → PQ-04 ✅ → **PQ-10** (P0) → PQ-11 (P0) → PQ-12 (P0) → PQ-13..PQ-16 (P1, параллельно) → PQ-17 (P2)
+**Рекомендация внешнего ревью:** вместо ручного исправления 20+ пунктов — написать `tools/validate-prompts.js` (статический линтер промтов). Это превратит значительную часть спеки в автоматическую проверку (§8 чек-лист, §9 конвенции).
 
-> Раунд 1 (PQ-01..PQ-04): все P0 закрыты. Раунд 2 (PQ-10..PQ-17): 3 P0 + 4 P1 + 1 P2 — готовы к выполнению.
-
-### Phase 7 — Language Migration (LLM-prompts → English)
+### Phase 7 — Language Migration (LLM-prompts → English) — ЗАМОРОЖЕНА
 
 > По конвенции PROMPT-QUALITY-SPEC §9.1: всё что читает LLM → английский, strategy/ → русский.
-> Выполнять **после** PQ-10..PQ-16 (когда структура стабилизируется).
+> Внешнее ревью рекомендовало **отложить без даты**. Аргументы:
+> 1. Современные LLM обрабатывают русские промты эквивалентно английским
+> 2. Объём 486 строк × тонкости терминологии, нужен билингвальный review
+> 3. Ценность для пользователя = 0 (internal refactor без observable benefit)
 > Полный план: PROMPT-QUALITY-SPEC.md §10
 
 | Задача | Паттерн | Статус |
@@ -668,11 +670,16 @@ plans/tests-e2e-example/
 - [x] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку **(PQ-03, выполнено)**
 - [x] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку **(PQ-04, выполнено)**
 
-### для Phase 6 — Раунд 2 (новые P0)
+### для Phase 6 — Раунд 2 (обновлено v5.1)
 
-- [ ] Если изменён agent-workflow-core — W10/W11 вынесены в отдельные skills. Файл ≤ 400 строк **(PQ-10, pending)**
-- [ ] Если заменён W8 — ссылка на test-plan-template skill работает **(PQ-11, pending)**
-- [ ] Если изменён QWEN.md — импортированный блок использует content_hash подход **(PQ-12, pending)**
+- [ ] Если изменён agent-workflow-core — W10/W11 вынесены в отдельные skills. Файл ≤ 400 строк **(PQ-10, отложено)**
+- [ ] Если заменён W8 — ссылка на test-plan-template skill работает **(PQ-11, рекомендовано)**
+- [ ] Если изменён QWEN.md — импортированный блок использует content_hash подход **(PQ-12, deferred)**
+- [ ] Если grep по `narrow|unusual|narrowest` в SKILL.md и agents/ не находит вхождений **(PQ-13, рекомендовано)**
+
+### для Phase 7 — Language Migration — ЗАМОРОЖЕНА
+
+- [ ] Не начинать (см. §10, решение внешнего ревью)
 
 ---
 

@@ -1,7 +1,9 @@
 # PROMPT-QUALITY-SPEC.md — Спецификация качества промтов GigaTest
 
-> Версия: 2.0 | Дата: 2026-04-19
-> Предыдущая версия: 1.0 (архив: `archive/ARCHIVE-PROMPT-QUALITY-SPEC.md`)
+> Версия: 2.1 | Дата: 2026-04-19
+> Предыдущая версия: 2.0 (2026-04-19)
+>
+> **Изменения v2.1:** Внешний ревью: PQ-02/PQ-03/PQ-04 подтверждены как де-факто выполненные (§6 → все done). Раздел §7 дополнен PQ-11/PQ-13 (рекомендованные к выполнению). §10 языковая миграция — статус «заморожена».
 >
 > **Назначение:** Описать обнаруженные проблемы качества промтов (SKILL.md, agents/*.md, context/*.md, QWEN.md)
 > и план их устранения. Содержит конкретные задачи с паттернами для агентов-имплементеров.
@@ -174,14 +176,14 @@
 
 ## 6. Паттерны исправления: Раунд 1 (PQ-01..PQ-04)
 
-### P0 — Выполнено
+### P0 — Выполнено (подтверждено внешним ревью)
 
 | ID | Задача | Файлы | Статус |
 |----|--------|-------|--------|
 | PQ-01 | Устранить «или иную логику» в W1.4 | agent-workflow-core W1.4 | ✅ done |
-| PQ-02 | Устранить «менее 3 → downgrade» → `coverage_status: "partial"` | test-audit Phase 2 | ✅ done |
-| PQ-03 | Stack Detection DRY: QWEN.md → ссылка на W10.2 | QWEN.md | ✅ done |
-| PQ-04 | Quality Checklist DRY: testing-standards §3 = source + delta | testing-standards, test-audit, test-review | ✅ done |
+| PQ-02 | Устранить «менее 3 → downgrade» → `coverage_status: "partial"` | test-audit Phase 2 | ✅ done (внешний ревью подтвердил: правило в Quality Checklist, ссылка на R4) |
+| PQ-03 | Stack Detection DRY: QWEN.md → ссылка на W10.2 | QWEN.md | ✅ done (внешний ревью подтвердил: таблица заменена ссылкой) |
+| PQ-04 | Quality Checklist DRY: testing-standards §3 = source + delta | testing-standards, test-audit, test-review | ✅ done (внешний ревью подтвердил: Source of truth помечен, оба skills ссылаются) |
 
 ---
 
@@ -191,8 +193,8 @@
 
 | ID | Задача | Паттерн | Файлы | Оценка эффекта |
 |----|--------|---------|-------|----------------|
-| PQ-10 | Вынести W10/W11 из agent-workflow-core | W10 → `state-discovery/SKILL.md`, W11 → `convention-loading/SKILL.md` | agent-workflow-core | 654 → ~400 строк |
-| PQ-11 | Удалить дубликат W8 из agent-workflow-core | Заменить тело W8 ссылкой на test-plan-template skill | agent-workflow-core | -80 строк |
+| PQ-10 | Вынести W10/W11 из agent-workflow-core | W10 → `state-discovery/SKILL.md`, W11 → `convention-loading/SKILL.md` | agent-workflow-core | 654 → ~400 строк | **Отложено** (делать при 800+ строках) |
+| PQ-11 | Удалить дубликат W8 из agent-workflow-core | Заменить тело W8 ссылкой на test-plan-template skill | agent-workflow-core | -80 строк | **Рекомендовано** |
 | PQ-12 | Синхронизировать импортированный W8.4 в QWEN.md | QWEN.md импортирует agent-workflow-core целиком — убедиться что импортируется версия с content_hash (не mtime) | QWEN.md (через импорт) | Консистентность |
 
 ### P1 — Желательно (улучшают читаемость и DRY)
@@ -288,7 +290,7 @@
 
 ---
 
-## 10. Масштабная задача: Языковая миграция на английский (LLM-промты)
+## 10. Масштабная задача: Языковая миграция на английский (LLM-промты) — ЗАМОРОЖЕНА
 
 > По конвенции §9.1: всё что читает LLM → английский. strategy/ → русский.
 > Ниже — полный план миграции. Выполнять после PQ-10..PQ-16 (когда структура стабилизируется).

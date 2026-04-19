@@ -1,14 +1,14 @@
 # backlog.yaml — Machine-readable бэклог GigaTest
-# Версия: 3.2 | Дата: 2026-04-19
+# Версия: 5.0 | Дата: 2026-04-19T18:00:00Z
 # Source of truth для статусов задач.
 # Human-readable версия: BLOCK-2-GIGATEST-GROWTH.md
 # Maturity matrix: READINESS-MATRIX.md
 
 meta:
-  version: "4.3"
-  updated: "2026-04-19T12:00:00Z"
+  version: "5.0"
+  updated: "2026-04-19T18:00:00Z"
   total_items: 49
-  readiness_score: "5.0/5"
+  readiness_score: "4.6/5"
   north_star: "≥70% автономных сессий без эскалации к человеку"
 
 # ─────────────────────────────────────────────
@@ -546,7 +546,8 @@ phase-6:
     - id: PQ-02
       title: "Устранить амбигуитет 'менее 3 → downgrade'"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/test-audit/SKILL.md
       source: PROMPT-QUALITY-SPEC.md PQ-02
@@ -563,7 +564,8 @@ phase-6:
     - id: PQ-03
       title: "Устранить дублирование Stack Detection"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: QWEN.md
       source: PROMPT-QUALITY-SPEC.md PQ-03
@@ -580,7 +582,8 @@ phase-6:
     - id: PQ-04
       title: "Устранить дублирование Quality Checklists"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: context/testing-standards.md
       source: PROMPT-QUALITY-SPEC.md PQ-04
@@ -596,6 +599,46 @@ phase-6:
       depends_on: []
       estimated_effort: S
       tags: [prompt-quality, DRY, phase-6]
+
+    - id: PQ-11
+      title: "Убрать дубликат W8 (шаблон test-plan.md) из agent-workflow-core"
+      priority: P0
+      status: pending
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: PROMPT-QUALITY-SPEC.md PQ-11
+      action: >
+        Заменить тело W8 шаблона test-plan.md в agent-workflow-core/SKILL.md ссылкой
+        на test-plan-template/SKILL.md. Шаблон уже существует как отдельный skill —
+        нет смысла дублировать 80 строк в core.
+      acceptance:
+        - "W8 в agent-workflow-core/SKILL.md содержит ссылку на test-plan-template/SKILL.md"
+        - "Нет дублирования ~80 строк шаблона в core"
+        - "Ссылка работает (test-plan-template/SKILL.md существует)"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, DRY, phase-6]
+
+    - id: PQ-13
+      title: "Заменить субъективные термины narrow/unusual/narrowest на verifiable формулировки"
+      priority: P1
+      status: pending
+      phase: phase-6
+      file: "skills/test-implementation, skills/test-review, skills/test-verification, skills/using-gigatest, agents/*"
+      source: PROMPT-QUALITY-SPEC.md PQ-13
+      action: >
+        Заменить 5 вхождений субъективных терминов на verifiable формулировки:
+        - "narrow scope" → "do not modify files outside the current task's artifact path"
+        - "valid but unusual pattern" → "pattern not listed in Forbidden Patterns (testing-standards §4)"
+        - "narrowest command" → "single most specific command for the claimed coverage area"
+        - "narrowest useful verification" → "most specific verification for the claimed requirement"
+        - "narrow clarifying question" → "single clarifying question limited to the specific ambiguity"
+      acceptance:
+        - "grep по project не находит 'narrow', 'unusual', 'narrowest' в SKILL.md и agents/"
+        - "Все замены сохраняют исходный смысл правила"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, precision, phase-6]
 
 # ─────────────────────────────────────────────
 # BRIDGE — МОСТ GIGACRAFT ↔ GIGATEST

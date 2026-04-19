@@ -75,7 +75,7 @@ Output a summary table:
 - Review is read-only; do not modify test files during review.
 - Present findings as actionable items with specific suggestions.
 - Do not flag stylistic preferences that don't affect test quality.
-- If a test uses a valid but unusual pattern, explain why it works rather than suggesting a change.
+- If a test uses a pattern not listed in Forbidden Patterns (testing-standards §4), explain why it works rather than suggesting a change.
 - For tests being reviewed after `test-implementation`, check that they match the `quality_gate` requirements from the audit plan in `agent-state.json`.
 - After review, provide a summary and wait for user feedback before proceeding.
 

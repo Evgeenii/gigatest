@@ -26,7 +26,7 @@ Before any success claim:
 2. Check that all `plan.items` have `status` of `done` or `skipped` (no `pending`, `in_progress`, or `blocked`).
 3. Verify `plan.meta.progress_percent == 100`.
 4. Identify the exact claim you are about to make (e.g., "all tests pass", "login tests pass", "coverage increased").
-5. Identify the narrowest command that can prove that claim.
+5. Identify the single most specific command that can verify that claim.
 6. Run that command now against the current workspace.
 7. Read the actual output and exit status instead of assuming the result.
 8. Report the result with evidence.
@@ -57,7 +57,7 @@ Before any success claim:
 
 - Always load `agent-state.json` first to verify plan completeness before running tests.
 - If `agent-state.json` shows incomplete tasks, report: `[VERIFY] plan incomplete: {{N}} tasks still pending/blocked`.
-- Prefer the narrowest useful verification first, then expand only if task risk justifies it.
+- Start with the most specific verification for the claimed requirement, then expand only if task risk justifies it.
 - When you make a success claim, include the exact command you ran and the key result.
 - If verification fails, report the failure plainly and stop claiming completion.
 - If verification cannot run, say what blocked it and what risk remains.

@@ -1,24 +1,28 @@
 # BLOCK-2-GIGATEST-GROWTH.md — Стратегия развития GigaTest
 
-> Версия: 4.0 | Дата: 2026-04-19
-> Предыдущая версия: 2.5 (2026-04-18)
+> Версия: 5.1 | Дата: 2026-04-19
+> Предыдущая версия: 4.0 (2026-04-19, Phase 5 complete)
 >
-> **Изменения v4.0:** Phase 5 (Convention Discovery) завершена. Добавлены W11, convention-discovery, convention-review, convention-discoverer agent, docs/CONVENTION-DISCOVERY.md.
+> **Изменения v5.1:** Внешний аудит: PQ-02/PQ-03/PQ-04 подтверждены как де-факто выполненные.
+> READINESS-MATRIX v5.0 скорректирован: 4.0 → 4.6. Остались PQ-11/PQ-13.
 
 ---
 
 ## Текущее состояние
 
-> **Обновлено: 2026-04-19 после Phase 0–5, аудит v5.0.** Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v5.0.
+> **Обновлено: 2026-04-19 после внешнего ревью, READINESS-MATRIX v5.1.**
+> Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v5.1.
 
 | Показатель | Значение |
 |---|---|
-| Зрелость (Readiness Score) | **4.0 / 5** ↓ (было 4.9 — добавлены 2 новых измерения) |
+| Зрелость (Readiness Score) | **4.6 / 5** (v5.0: 4.0 — скорректирован по результатам аудита) |
 | Критических гэпов (C1–C5) | **0** (закрыты) ✅ |
 | Высоких гэпов (H1–H5) | **0** (закрыты) ✅ |
 | Средних гэпов | **0** (закрыты) ✅ |
-| P0 Architecture & Prompt Quality | **9** (новые из аудита v5.0) |
-| Статус | 🟡 **Stable (Phase 6 в бэклоге)** |
+| Архитектурные P0 (P0-A1..A5) | **5/5 done** ✅ |
+| Prompt Quality P0 (PQ-01..04) | **4/4 done** ✅ |
+| Prompt Quality pending | **PQ-11** (P0, W8 dedup), **PQ-13** (P1, subjective terms) |
+| Статус | 🟢 **Stable (Phase 6: PQ-11/PQ-13 recommended)** |
 
 Полная матрица гэпов — [`READINESS-MATRIX.md`](READINESS-MATRIX.md).
 
@@ -40,6 +44,7 @@ Production  Стабили-  Расшире-  Тулинг    Prezenta- Conventi
 ready        зация     ние       (CLI-     ция        Discovery Prompt
 (~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo     и adopt.  Quality
                                (~3 нед.)  (~2 нед.)  (~4 нед.) (~3 нед.)
+                                          ✅ done    ✅ done    P0 done, PQ-11/13 pending
 ```
 
 ---
