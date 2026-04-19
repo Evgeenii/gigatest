@@ -570,7 +570,7 @@ plans/tests-e2e-example/
 
 ### Phase 6 — Architecture & Prompt Quality
 
-**Статус:** ✅ P0-A1..P0-A5 + PQ-01 завершены (2026-04-19)
+**Статус:** ✅ P0-A1..P0-A5 + PQ-01..PQ-04 выполнены. PQ-10..PQ-17 — раунд 2 audit (новые P0/P1)
 
 | Задача | Паттерн | Статус |
 |--------|---------|--------|
@@ -580,13 +580,38 @@ plans/tests-e2e-example/
 | P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards | ✅ done |
 | P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order, content_hash | ✅ done |
 | PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнено вместе | ✅ done |
-| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | pending |
-| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | pending |
-| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | pending |
+| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | ✅ done |
+| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | ✅ done |
+| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | ✅ done |
+| **PQ-10: agent-workflow-core split** | **Вынести W10/W11 в отдельные skills** | **pending** |
+| **PQ-11: W8 dedup** | **Заменить W8 ссылкой на test-plan-template** | **pending** |
+| **PQ-12: QWEN.md sync** | **Синхронизировать импортированный W8.4 с content_hash** | **pending** |
+| PQ-13: Subjective terms removal | Заменить narrow/unusual/narrowest на verifiable формулировки | pending |
+| PQ-14: test-review Forbidden DRY | Ссылка на testing-standards §4 вместо дублирования | pending |
+| PQ-15: R2/R3/R4.1 overlays DRY | Вынести общие правила в testing-standards §6 | pending |
+| PQ-16: W6 pre-flight DRY | agents/*.md → ссылка на agent-workflow-core W6 | pending |
+| PQ-17: R9 Common Pitfalls | Добавить к Java/JS overlays | pending |
 
-**Порядок выполнения PQ:** PQ-02 → PQ-03 → PQ-04
+**Порядок выполнения PQ:** PQ-02 → PQ-03 → PQ-04 ✅ → **PQ-10** (P0) → PQ-11 (P0) → PQ-12 (P0) → PQ-13..PQ-16 (P1, параллельно) → PQ-17 (P2)
 
-> Все архитектурные P0 закрыты. Оставшиеся PQ-02..PQ-04 — prompt-quality, независимые.
+> Раунд 1 (PQ-01..PQ-04): все P0 закрыты. Раунд 2 (PQ-10..PQ-17): 3 P0 + 4 P1 + 1 P2 — готовы к выполнению.
+
+### Phase 7 — Language Migration (LLM-prompts → English)
+
+> По конвенции PROMPT-QUALITY-SPEC §9.1: всё что читает LLM → английский, strategy/ → русский.
+> Выполнять **после** PQ-10..PQ-16 (когда структура стабилизируется).
+> Полный план: PROMPT-QUALITY-SPEC.md §10
+
+| Задача | Паттерн | Статус |
+|--------|---------|--------|
+| LANG-01: testing-standards.md EN | Перевести на английский (базовый файл) | pending |
+| LANG-02: QWEN.md EN | Перевести на английский (root prompt) | pending |
+| LANG-03: agents/*.md EN (6 файлов) | Перевести все agent-профили | pending |
+| LANG-04: Glossary | Создать глоссарий терминов перед переводом | pending |
+
+**Порядок:** LANG-04 → LANG-01 → LANG-02 → LANG-03
+
+> Зависимость: LANG-01 должен идти первым — от него ссылаются agent-файлы.
 
 ### Bridge — Мост
 
@@ -635,13 +660,19 @@ plans/tests-e2e-example/
 - [ ] Пример `plans/tests-audit-example/agent-state.json` валидируется
 - [ ] Enum `agent.type` синхронизирован с `agents/`
 
-### для Phase 6 (Architecture & Prompt Quality)
+### для Phase 6 (Architecture & Prompt Quality) — Раунд 1
 
-- [x] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику» **(выполнено)**
-- [x] Если изменены JSON Schema — обе схемы обновлены консистентно **(выполнено: content_hash добавлен)**
-- [ ] Если добавлен content_hash — примеры state файлов содержат новое поле
-- [ ] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку **(pending PQ-03)**
-- [ ] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку **(pending PQ-04)**
+- [x] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику» **(PQ-01, выполнено)**
+- [x] Если изменены JSON Schema — обе схемы обновлены консистентно **(P0-A3, content_hash добавлен)**
+- [x] Если добавлен content_hash — примеры state файлов содержат новое поле **(выполнено)**
+- [x] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку **(PQ-03, выполнено)**
+- [x] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку **(PQ-04, выполнено)**
+
+### для Phase 6 — Раунд 2 (новые P0)
+
+- [ ] Если изменён agent-workflow-core — W10/W11 вынесены в отдельные skills. Файл ≤ 400 строк **(PQ-10, pending)**
+- [ ] Если заменён W8 — ссылка на test-plan-template skill работает **(PQ-11, pending)**
+- [ ] Если изменён QWEN.md — импортированный блок использует content_hash подход **(PQ-12, pending)**
 
 ---
 
