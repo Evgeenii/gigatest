@@ -1,34 +1,36 @@
 # READINESS-MATRIX.md — Матрица готовности GigaTest
 
-> Версия: 4.2 | Дата: 2026-04-19
-> Предыдущая версия: 4.1 (2026-04-18, до Phase 5)
+> Версия: 5.1 | Дата: 2026-04-19
+> Предыдущая версия: 5.0 (2026-04-19, до внешнего ревью)
 >
 > **Использование:** Объективная оценка текущего состояния GigaTest по всем измерениям.
 > Служит точкой принятия решений и приоритизации.
 >
 > **Методология:** 5-балльная шкала. 1 = отсутствует / критичный гэп. 5 = production-ready.
 >
-> **Изменения v4.2:** `testing-standards.md` стал по-настоящему stack-agnostic (был React-центричен).
-> React-specific forbidden patterns перенесены в `react-testing.md §R8`.
-> Skills и агенты адаптированы: test-audit, test-review, test-implementation, test-auditor, test-reviewer.
+> **Изменения v5.1:** Внешний аудит подтвердил: PQ-02/PQ-03/PQ-04 де-факто выполнены.
+> Скорректированы оценки: Convention Discovery 0.5 → 4.5, Архитектурная надёжность 3.5 → 4.2,
+> Качество промтов 3.5 → 3.8. ИТОГО пересчитан: 4.0 → 4.6.
 
 ---
 
 ## Сводка
 
-| Измерение | Оценка | Δ к v3.1 | Статус |
+| Измерение | Оценка | Δ к v5.0 | Статус |
 |-----------|--------|----------|--------|
 | Архитектура workflow | 4.8 / 5 | — | 🟢 Production-ready |
-| State Management | 4.9 / 5 | +0.1 | 🟢 Production-ready |
+| State Management | 4.9 / 5 | — | 🟢 Production-ready |
 | Агентная система | 4.9 / 5 | — | 🟢 Production-ready |
-| Skills / Навыки | 5.0 / 5 | — | 🟢 Production-ready |
-| Stack Coverage | 4.8 / 5 | +0.1 | 🟢 Growing |
-| Developer Experience | 4.9 / 5 | +0.2 | 🟢 Production-ready |
-| Документация | 4.6 / 5 | +0.1 | 🟢 Production-ready |
+| Skills / Навыки | 4.8 / 5 | ↓0.2 | 🟢 Production-ready (agent-workflow-core >400 строк) |
+| Stack Coverage | 4.7 / 5 | — | 🟢 Growing |
+| Developer Experience | 4.7 / 5 | — | 🟢 Production-ready |
+| Документация | 4.5 / 5 | — | 🟢 Production-ready (ADR отсутствуют) |
 | Интеграция (мост) | 1.5 / 5 | — | 🔴 Не начато |
-| Тулинг | 4.5 / 5 | +3.5 | 🟢 New (Phase 3 complete) |
-| Convention Discovery | 0.5 / 5 | Novum | 🔴 Planned (Phase 5 — стратегия готова, имплементация pending) |
-| **ИТОГО** | **4.7 / 5** | **-0.2** | 🟡 **Stable (Phase 5 в бэклоге)** |
+| Тулинг | 4.5 / 5 | — | 🟢 Phase 3 complete |
+| Convention Discovery | **4.5 / 5** | **↑4.0** | 🟢 **Phase 5 complete** |
+| **Архитектурная надёжность** | **4.2 / 5** | **↑0.7** | 🟢 **P0-A1..A5 все done** |
+| **Качество промтов** | **3.8 / 5** | **↑0.3** | 🟡 **PQ-01..04 done, PQ-11/PQ-13 pending** |
+| **ИТОГО** | **4.6 / 5** | **↑0.6** | 🟢 **Stable (Phase 6: PQ-11, PQ-13 remaining)** |
 
 ---
 
@@ -272,16 +274,52 @@
 
 ---
 
-## Новые гэпы Phase 5 (Planned)
+## Закрытые гэпы Phase 5 ✅ (Convention Discovery)
 
-| ID | Severity | Компонент | Описание | Блокирует | Фаза |
-|----|----------|-----------|----------|-----------|------|
-| P5-022 | P1 | skills/ | Нет convention-discovery SKILL.md | Автоматическое обнаружение конвенций | Phase 5 |
-| P5-023 | P1 | schema | Нет convention-overlay-schema.json | Валидация output discovery | Phase 5 |
-| P5-024 | P1 | agents/ | Нет convention-discoverer агента | Исполнение workflow | Phase 5 |
-| P5-025 | P2 | workflow | Нет W11 Convention Loading Protocol | Использование custom conventions | Phase 5 |
-| P5-026 | P2 | skills/ | Нет convention-review SKILL.md | Human-in-the-loop validation | Phase 5 |
-| P5-027 | P2 | docs/ | Нет docs/CONVENTION-DISCOVERY.md | Onboarding на новую фичу | Phase 5 |
+| ID | Гэп | Задача | Статус | Подтверждение |
+|----|-----|--------|--------|---------------|
+| — | Нет convention-discovery SKILL.md | P5-022 | ✅ | `skills/convention-discovery/SKILL.md` — 4 фазы, exit conditions |
+| — | Нет convention-overlay-schema.json | P5-023 | ✅ | `skills/convention-discovery/convention-overlay-schema.json` — валидна, additionalProperties: false |
+| — | Нет convention-discoverer агента | P5-024 | ✅ | `agents/convention-discoverer.md` — failure modes, rules, output |
+| — | Нет W11 Convention Loading Protocol | P5-025 | ✅ | W11 добавлен в agent-workflow-core/SKILL.md, layer model документирован |
+| — | Нет convention-review SKILL.md | P5-026 | ✅ | `skills/convention-review/SKILL.md` — human-in-the-loop workflow |
+| — | Нет docs/CONVENTION-DISCOVERY.md | P5-027 | ✅ | `docs/CONVENTION-DISCOVERY.md` — quick start, примеры, FAQ, edge cases |
+
+---
+
+## Phase 6 (Architecture & Prompt Quality — обновлено v5.1)
+
+### Архитектурные (ARCHITECTURE-SPEC.md) — все P0 закрыты
+
+| ID | Severity | Компонент | Описание | Статус |
+|----|----------|-----------|----------|--------|
+| P0-A1 | P0 | workflow | Non-determinism в W1.4: «или иную логику» | ✅ done |
+| P0-A2 | P0 | tooling | Нет семантической валидации state | ✅ done |
+| P0-A3 | P0 | workflow | mtime-based конфликт test-plan.md | ✅ done (content_hash) |
+| P0-A4 | P0 | workflow | Мультистек: нет приоритизации оверлеев | ✅ done (W10.6) |
+| P0-A5 | P0 | workflow | State Discovery: выбор плана по mtime | ✅ done (JSON last_updated) |
+
+### Prompt Quality (PROMPT-QUALITY-SPEC.md)
+
+| ID | Severity | Компонент | Описание | Статус |
+|----|----------|-----------|----------|--------|
+| PQ-01 | P0 | workflow | «или иную логику» — пересекается с P0-A1 | ✅ done (P0-A1) |
+| PQ-02 | P0 | audit | «менее 3 → downgrade» без указания статуса | ✅ done |
+| PQ-03 | P0 | QWEN.md | Дублирование Stack Detection таблицы | ✅ done |
+| PQ-04 | P0 | standards | Quality Checklist дублируется в 4 файлах | ✅ done |
+| **PQ-10** | P0 | workflow | agent-workflow-core >400 строк, вынести W10/W11 | 🟡 pending (отложено) |
+| **PQ-11** | P0 | workflow | W8 дублирует test-plan-template | 🟡 pending (рекомендовано) |
+| **PQ-13** | P1 | precision | Субъективные термины narrow/unusual/narrowest | 🟡 pending (рекомендовано) |
+| PQ-14 | P1 | DRY | test-review Forbidden Patterns → ссылка | 🟡 deferred |
+| PQ-15 | P1 | DRY | R2/R3/R4.1 overlays → testing-standards §6 | 🔴 deferred (большой рефакторинг) |
+| PQ-16 | P1 | DRY | W6 pre-flight дублируется в agent-файлах | 🟡 deferred |
+| PQ-17 | P2 | coverage | R9 Common Pitfalls для Java/JS | 🔴 deferred |
+
+### Языковая миграция (§10 PROMPT-QUALITY-SPEC)
+
+| ID | Описание | Приоритет | Статус |
+|----|---------|-----------|--------|
+| §10 | Языковая миграция 8 файлов RU→EN | P1 | 🔴 **заморожена** (отложено без даты) |
 
 ---
 
@@ -292,8 +330,11 @@
 После Phase 0:       4.0/5 ████████████░░░░ Production-ready (core)
 После Phase 1:       4.4/5 █████████████░░░ Stable ✅
 После Phase 2:       4.7/5 ██████████████░░ Growing
-ТЕКУЩЕЕ (после Phase 4):    4.9/5 ███████████████░ Stable+ (All core phases complete)
-После Phase 5:           5.0/5 ████████████████ Convention Discovery + Project-Aware
+После Phase 3–4:     4.9/5 ███████████████░ Stable+ (All core phases complete)
+После аудита v5.0:   4.0/5 ████████████░░░↓ New dimensions added (Arch + Prompt)
+После внешнего       4.6/5 ███████████████░ Stable (Convention Discovery + Arch P0 done, PQ-11/13 remaining)
+  ревью (v5.1):
+После Phase 6:       5.0/5 ████████████████ Architecture + Prompt Quality production-grade
 ```
 
 ---

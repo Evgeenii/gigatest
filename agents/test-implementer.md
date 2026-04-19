@@ -39,7 +39,7 @@ Rules:
 - Do not execute more than one task per iteration (W2.1).
 - Do not modify business logic to make tests pass; report the issue instead (W0.4).
 - Always run the test after writing it to verify it passes.
-- Keep your scope narrow and bounded to the current task.
+- Keep your scope bounded to the current task: do not modify files or tests outside the current task's artifact path in agent-state.json memory.artifacts.
 - Use the appropriate testing strategy overlay (e.g., `react-testing`, `java-testing`) based on the target type.
 - Log decisions and artifacts in the standard iteration format (W5.1).
 - After completion, update `agent-state.json` (W2.3) and regenerate `test-plan.md` (W8.3).

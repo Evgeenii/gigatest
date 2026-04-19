@@ -1,25 +1,28 @@
 # BLOCK-2-GIGATEST-GROWTH.md — Стратегия развития GigaTest
 
-> Версия: 2.5 | Дата: 2026-04-18
-> Предыдущая версия: 2.4 (2026-04-18)
+> Версия: 5.1 | Дата: 2026-04-19
+> Предыдущая версия: 4.0 (2026-04-19, Phase 5 complete)
 >
-> **Изменения v2.5:** Интегрирован аналитический контент из удалённого PHASE-5-CONVENTION-DISCOVERY.md:
-> проблема, архитектура решения, workflow, риски, feasibility (cost estimates, benchmarks).
+> **Изменения v5.1:** Внешний аудит: PQ-02/PQ-03/PQ-04 подтверждены как де-факто выполненные.
+> READINESS-MATRIX v5.0 скорректирован: 4.0 → 4.6. Остались PQ-11/PQ-13.
 
 ---
 
 ## Текущее состояние
 
-> **Обновлено: 2026-04-18 после Phase 0–4.** Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v4.0.
+> **Обновлено: 2026-04-19 после внешнего ревью, READINESS-MATRIX v5.1.**
+> Полная матрица — [`READINESS-MATRIX.md`](READINESS-MATRIX.md) v5.1.
 
 | Показатель | Значение |
 |---|---|
-| Зрелость (Readiness Score) | **4.9 / 5** (было 3.2) |
+| Зрелость (Readiness Score) | **4.6 / 5** (v5.0: 4.0 — скорректирован по результатам аудита) |
 | Критических гэпов (C1–C5) | **0** (закрыты) ✅ |
 | Высоких гэпов (H1–H5) | **0** (закрыты) ✅ |
 | Средних гэпов | **0** (закрыты) ✅ |
-| Низких гэпов | 0 |
-| Статус | 🟢 **Production-ready (all phases 0–4)** |
+| Архитектурные P0 (P0-A1..A5) | **5/5 done** ✅ |
+| Prompt Quality P0 (PQ-01..04) | **4/4 done** ✅ |
+| Prompt Quality pending | **PQ-11** (P0, W8 dedup), **PQ-13** (P1, subjective terms) |
+| Статус | 🟢 **Stable (Phase 6: PQ-11/PQ-13 recommended)** |
 
 Полная матрица гэпов — [`READINESS-MATRIX.md`](READINESS-MATRIX.md).
 
@@ -36,11 +39,12 @@
 ## Обзор фаз
 
 ```
-Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
-Production  Стабили-  Расшире-  Тулинг    Prezenta-  Convention
-ready        зация     ние       (CLI-     ция        Discovery
-(~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo     и adoption
-                                (~3 нед.)  (~2 нед.)  (~4 нед.)
+Phase 0 → Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
+Production  Стабили-  Расшире-  Тулинг    Prezenta- Convention  Arch +
+ready        зация     ние       (CLI-     ция        Discovery Prompt
+(~2 нед.)  (~2 нед.) (~4 нед.) утилиты)   и demo     и adopt.  Quality
+                               (~3 нед.)  (~2 нед.)  (~4 нед.) (~3 нед.)
+                                          ✅ done    ✅ done    P0 done, PQ-11/13 pending
 ```
 
 ---
@@ -764,6 +768,45 @@ $ /audit-tests
 
 ---
 
+## Phase 6 — Architecture & Prompt Quality
+
+**Источник:** [`ARCHITECTURE-SPEC.md`](ARCHITECTURE-SPEC.md), [`PROMPT-QUALITY-SPEC.md`](PROMPT-QUALITY-SPEC.md)
+**Цель:** Устранить архитектурные риски (non-determinism, semantic validation, multi-stack)
+и повысить качество промтов (ambiguity removal, DRY consolidation).
+
+**Зависимость:** Phase 4 завершена. Phase 5 может идти параллельно (нет конфликтов файлов).
+
+### Проблема
+
+Архитектурный аудит v5.0 выявил 6 противоречий (C1–C6) и 6 edge cases (EC-1—EC-6) в `agent-workflow-core`.
+Лингвистический аудит выявил 7/10 качество промтов, 10 DRY duplication patterns, 7 амбигуитетов.
+
+### Задачи (P0)
+
+| ID | Описание | Файл | Effort |
+|----|----------|------|--------|
+| P0-A1 | W1.4 determinism: заменить «или иную логику» на алгоритм | `skills/agent-workflow-core/SKILL.md` | XS |
+| PQ-01 | W1.4 ambiguity fix (пересекается с P0-A1) | `skills/agent-workflow-core/SKILL.md` | XS |
+| P0-A5 | State Discovery: выбор плана по JSON timestamp | `skills/agent-workflow-core/SKILL.md` | XS |
+| P0-A3 | test-plan.md content_hash + regenerate warning | `skills/agent-workflow-core/SKILL.md`, схемы | S |
+| P0-A4 | Мультистек: приоритизация оверлеев (W10.6) | `skills/agent-workflow-core/SKILL.md` | XS |
+| P0-A2 | Semantic validation state | `tools/validate-state.js` | S |
+| PQ-02 | «менее 3 → partial» clarity | `skills/test-audit/SKILL.md` | XS |
+| PQ-03 | Stack Detection DRY — ссылка вместо таблицы | `QWEN.md` | XS |
+| PQ-04 | Quality Checklist DRY — единый источник | `context/testing-standards.md` + SKILL.md | S |
+
+**Порядок:** P0-A1+PQ-01 → P0-A5 → P0-A3 → P0-A4 → P0-A2 → PQ-02 → PQ-03 → PQ-04
+
+> Зависимость: P0-A1 и PQ-01 — один файл (один PR).
+> P0-A3 обновляет обе JSON Schema (нужно согласовать с P0-A2).
+
+### Exit Condition
+
+- [ ] Все 9 P0 задач закрыты
+- [ ] READINESS-MATRIX.md обновлён: Architecture ≥ 5/5, Prompt Quality ≥ 5/5
+
+---
+
 ## Метрики успеха по фазам
 
 | Фаза | Readiness Score | Ключевой индикатор |
@@ -775,3 +818,4 @@ $ /audit-tests
 | После Phase 3 | 4.9/5 | CLI-утилиты работают локально |
 | После Phase 4 | 4.9/5 | Demo + comparison + metrics готовы |
 | После Phase 5 | 5.0/5 | Convention discovery end-to-end: scan → generate → validate → use |
+| После Phase 6 | 5.0/5 | Architecture + Prompt Quality production-grade: 0 P0 gaps |

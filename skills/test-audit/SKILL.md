@@ -27,16 +27,14 @@ For each test file, evaluate quality using the mandatory checklist:
 
 #### Quality Checklist
 
-Базовая checklist применяется ко **всем** тестам. Stack-специфичные элементы —
-в соответствующем `context/<stack>-testing.md` overlay (R4).
+Базовая checklist — `@context/testing-standards.md §3`. Применить ко **всем** тестам.
 
-**Базовые вопросы (любой стек):**
-- [ ] Сколько `it`/`test`/`@Test`/`def test_`/`func Test*` блоков? (менее 3 → автоматический downgrade)
-- [ ] Есть ли проверка взаимодействия? (UI: `userEvent`; backend: HTTP-вызов через supertest/TestClient/httptest; сервис: вызов метода)
-- [ ] Есть ли проверки асинхронного поведения? (`await findBy*`, `waitFor`, `async/await`, `assertThrows`)
-- [ ] Проверены ли разные состояния? (success, error, empty, edge cases)
-- [ ] Обработаны ли `null`/`undefined`/`None`/`nil`/пустые коллекции?
-- [ ] Проверены ли ошибки? (try/catch, error boundaries, failed API responses, исключения)
+Ниже — **delta** (дополнительные вопросы аудита + классификация):
+
+- [ ] Сколько `it`/`test`/`@Test`/`def test_`/`func Test*` блоков? (менее 3 → `coverage_status: "partial"`. Stack-специфичные уточнения — в `context/<stack>-testing.md` R4)
+- [ ] Для UI-тестов: есть ли `userEvent`/`fireEvent`? Нет → `coverage_status: "partial"`
+- [ ] Для backend/API тестов: есть ли интеграционный HTTP-вызов (supertest/TestClient/httptest)? Нет → `coverage_status: "partial"`
+- [ ] Оценить по Coverage Classification таблице ниже
 
 #### Coverage Classification
 

@@ -35,7 +35,7 @@ Your job at the start of testing work is to route into the correct workflow stag
 - If the user asks to "write tests for X" and a plan already exists → `test-implementation`
 - If the user asks to "review my tests" or "check test quality" → `test-review`
 - If the user asks to "run the tests" or "check if tests pass" → `test-verification`
-- If the next stage is ambiguous, ask one narrow clarifying question.
+- If the next stage is ambiguous, ask one clarifying question limited to the specific ambiguity.
 - If automatic routing is not enough, tell the user which slash command is the manual fallback.
 
 ## Exit Conditions

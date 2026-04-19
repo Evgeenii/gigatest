@@ -26,17 +26,11 @@ For each test file, evaluate against the mandatory quality checklist:
 
 #### Test Quality Checklist
 
-Базовый checklist stack-agnostic. Stack-специфичные детали см. в `context/<stack>-testing.md`.
+Базовая checklist — `@context/testing-standards.md §3`. Применить к каждому файлу.
 
-- [ ] **Behavior, not implementation**: Does the test check observable behavior rather than internal state (no private fields, no internal methods, no reflection)?
-- [ ] **Meaningful assertions**: Are assertions checking observable outcomes (response body, status code, DOM content, returned value) rather than internal state?
-- [ ] **Async/Interaction correctness**: Are async operations properly handled (`await`/`waitFor`/`async/await`/`assertThrows`), not bare `setTimeout`/synchronous calls? For UI: interaction events properly simulated?
-- [ ] **No excessive mocks**: Are only necessary dependencies mocked? No mocking of internal logic within the tested module?
-- [ ] **Single scenario per test**: Does each test block check exactly one scenario?
-- [ ] **Descriptive naming**: Does the test name describe the expected behavior (e.g. `should_return_404_when_not_found`), not implementation (`test_get_user`)?
+Ниже — **delta** (уникальные вопросы review, не входящие в базовый чеклист):
+
 - [ ] **Stable data**: Are dates/UUIDs/random values mocked or fixed for deterministic tests?
-- [ ] **Edge case coverage**: Are null/undefined/empty/error/boundary states tested where applicable?
-- [ ] **No duplication**: Is there no duplication with other existing tests for the same behavior?
 - [ ] **Testability**: Can this test be simplified (fewer mocks, simpler setup, less indirection)?
 
 ### Phase 3: Findings Report
@@ -66,7 +60,7 @@ Output a summary table:
 
 ## Forbidden Patterns
 
-Эти паттерны запрещены для **любого** стека. React-специфичные см. в `context/react-testing.md`.
+Эти паттерны запрещены для **любого** стека.
 
 | Pattern | Why it's bad | Stack |
 |---------|-------------|-------|
@@ -76,21 +70,12 @@ Output a summary table:
 | Test assertions without any assertion | Test passes without verifying anything | Any |
 | Order-dependent tests (tests pass only in a specific sequence) | Unpredictable CI behavior | Any |
 
-**React-специфичные** (apply только к React-проектам):
-
-| Pattern | Why it's bad |
-|---------|-------------|
-| `expect(component.state).toBe(...)` | Testing internal component state |
-| `jest.mock()` on internal React functions | Mocking implementation details |
-| `expect(wrapper.instance().method).toHaveBeenCalled()` | Testing implementation, not behavior |
-| Direct `act(() => ...)` without `await` | Outdated pattern, potential race condition |
-
 ## Rules
 
 - Review is read-only; do not modify test files during review.
 - Present findings as actionable items with specific suggestions.
 - Do not flag stylistic preferences that don't affect test quality.
-- If a test uses a valid but unusual pattern, explain why it works rather than suggesting a change.
+- If a test uses a pattern not listed in Forbidden Patterns (testing-standards §4), explain why it works rather than suggesting a change.
 - For tests being reviewed after `test-implementation`, check that they match the `quality_gate` requirements from the audit plan in `agent-state.json`.
 - After review, provide a summary and wait for user feedback before proceeding.
 

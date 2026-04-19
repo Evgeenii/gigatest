@@ -1,14 +1,14 @@
 # backlog.yaml — Machine-readable бэклог GigaTest
-# Версия: 3.1 | Дата: 2026-04-19
+# Версия: 5.0 | Дата: 2026-04-19T18:00:00Z
 # Source of truth для статусов задач.
 # Human-readable версия: BLOCK-2-GIGATEST-GROWTH.md
 # Maturity matrix: READINESS-MATRIX.md
 
 meta:
-  version: "4.1"
-  updated: "2026-04-19T12:00:00Z"
-  total_items: 32
-  readiness_score: "5.0/5"
+  version: "5.0"
+  updated: "2026-04-19T18:00:00Z"
+  total_items: 49
+  readiness_score: "4.6/5"
   north_star: "≥70% автономных сессий без эскалации к человеку"
 
 # ─────────────────────────────────────────────
@@ -275,7 +275,8 @@ phase-5:
     - id: P5-022
       title: "Создать skill convention-discovery (skills/convention-discovery/SKILL.md)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-discovery/SKILL.md
       action: >
@@ -299,7 +300,8 @@ phase-5:
     - id: P5-023
       title: "Convention overlay output format (schema)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-discovery/convention-overlay-schema.json
       action: >
@@ -321,7 +323,8 @@ phase-5:
     - id: P5-024
       title: "Convention Discovery Agent (agents/convention-discoverer.md)"
       priority: P1
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: agents/convention-discoverer.md
       action: >
@@ -344,7 +347,8 @@ phase-5:
     - id: P5-025
       title: "Integration: Loading discovered conventions in test workflow"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/agent-workflow-core/SKILL.md
       action: >
@@ -366,7 +370,8 @@ phase-5:
     - id: P5-026
       title: "Convention validation and review flow"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: skills/convention-review/SKILL.md
       action: >
@@ -388,7 +393,8 @@ phase-5:
     - id: P5-027
       title: "Document: docs/CONVENTION-DISCOVERY.md"
       priority: P2
-      status: pending
+      status: done
+      completed_at: "2026-04-19T12:00:00Z"
       phase: phase-5
       file: docs/CONVENTION-DISCOVERY.md
       action: >
@@ -409,6 +415,230 @@ phase-5:
       depends_on: [P5-022, P5-024, P5-025]
       estimated_effort: M
       tags: [docs, phase-5]
+
+# ─────────────────────────────────────────────
+# PHASE 6 — ARCHITECTURE & PROMPT QUALITY
+# ─────────────────────────────────────────────
+
+phase-6:
+  name: "Architecture & Prompt Quality"
+  goal: "Устранить архитектурные риски и повысить качество промтов до production-grade"
+  exit_metric: "Все P0 из ARCHITECTURE-SPEC.md и PROMPT-QUALITY-SPEC.md закрыты"
+  items:
+
+    # ARCHITECTURE-SPEC.md P0 tasks
+
+    - id: P0-A1
+      title: "Устранить non-determinism в W1.4"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: ARCHITECTURE-SPEC.md P0-A1
+      action: >
+        Заменить фразу "первую по приоритету (или иную логику)" на конкретный алгоритм:
+        сначала по priority (critical → high → medium → low), затем по order (id asc, лексикографически).
+      acceptance:
+        - "W1.4 содержит конкретный алгоритм без 'или иную логику'"
+        - "Повторный запуск на одинаковом state выбирает одинаковую задачу"
+      depends_on: []
+      estimated_effort: XS
+      tags: [workflow, determinism, phase-6, architecture]
+
+    - id: P0-A2
+      title: "Добавить семантическую валидацию state"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: tools/validate-state.js
+      source: ARCHITECTURE-SPEC.md P0-A2
+      action: >
+        Создать tools/validate-state.js с семантическими проверками:
+        meta.done == count(status=done), progress_percent = done/total_items * 100,
+        history хронологичен. Ускорить Phase 3 из IMPLEMENTATION-SPEC.
+      acceptance:
+        - "tools/validate-state.js существует"
+        - "Проверяет семантику: meta.done, progress_percent, history order"
+        - "Exit code 1 при логической несогласованности"
+      depends_on: []
+      estimated_effort: S
+      tags: [tooling, validation, phase-6, architecture]
+
+    - id: P0-A3
+      title: "Протокол конфликтов test-plan.md"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: ARCHITECTURE-SPEC.md P0-A3
+      action: >
+        Добавить content_hash поле в session. Сравнивать hash при regenerate.
+        Если hash ≠ computed → предупредить: "[AGENT] WARNING: test-plan.md has user modifications".
+        Обновить обе JSON Schema (добавить поле).
+      acceptance:
+        - "content_hash поле добавлено в схемы"
+        - "W8.4 сравнивает hash перед перезаписью"
+        - "При mismatch — предупреждение пользователю"
+      depends_on: []
+      estimated_effort: S
+      tags: [workflow, documentation, phase-6, architecture]
+
+    - id: P0-A4
+      title: "Мультистек: приоритизация оверлеев"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: ARCHITECTURE-SPEC.md P0-A4
+      action: >
+        Добавить W10.6: Layer Model — файл → stack detection → конкретный overlay.
+        Если файл .java → Java overlay, если .tsx → React overlay.
+        При отсутствии stack-specific fallback на testing-standards.
+      acceptance:
+        - "W10.6 описывает алгоритм приоритизации по типу файла"
+        - "При конфликте правил — приоритет по типу тестируемого файла"
+      depends_on: []
+      estimated_effort: XS
+      tags: [workflow, multi-stack, phase-6, architecture]
+
+    - id: P0-A5
+      title: "State Discovery: выбор плана"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: ARCHITECTURE-SPEC.md P0-A5
+      action: >
+        Уточнить W10.5: сортировать по session.last_updated внутри JSON (не mtime).
+        Если несколько с active → выбрать последний. Если none active → создать новый.
+      acceptance:
+        - "W10.5 использует session.last_updated из JSON, не filesystem mtime"
+        - "Описано поведение при нескольких active планах"
+      depends_on: []
+      estimated_effort: XS
+      tags: [workflow, state-discovery, phase-6, architecture]
+
+    # PROMPT-QUALITY-SPEC.md P0 tasks
+
+    - id: PQ-01
+      title: "Устранить амбигуитет 'или иную логику' (W1.4)"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: PROMPT-QUALITY-SPEC.md PQ-01
+      action: >
+        Заменить: "если приоритеты равны → order by id ascending (лексикографически)".
+        Пересекается с P0-A1 — выполнить вместе.
+      acceptance:
+        - "W1.4 не содержит 'или иную логику'"
+        - "Алгоритм однозначен: priority → id ascending"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, workflow, phase-6]
+
+    - id: PQ-02
+      title: "Устранить амбигуитет 'менее 3 → downgrade'"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: skills/test-audit/SKILL.md
+      source: PROMPT-QUALITY-SPEC.md PQ-02
+      action: >
+        Указать: "менее 3 it/test блоков → coverage_status: partial".
+        Ссылка на R4 соответствующего overlay.
+      acceptance:
+        - "Phase 2 test-audit SKILL.md содержит явно 'coverage_status: partial'"
+        - "Есть ссылка на overlay R4"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, audit, phase-6]
+
+    - id: PQ-03
+      title: "Устранить дублирование Stack Detection"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: QWEN.md
+      source: PROMPT-QUALITY-SPEC.md PQ-03
+      action: >
+        В QWEN.md заменить таблицу Stack Detection на ссылку:
+        "Stack detection алгоритм → см. agent-workflow-core W10.2".
+      acceptance:
+        - "QWEN.md не содержит дублирующую таблицу Stack Detection"
+        - "Содержит ссылку на agent-workflow-core W10.2"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, DRY, phase-6]
+
+    - id: PQ-04
+      title: "Устранить дублирование Quality Checklists"
+      priority: P0
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
+      phase: phase-6
+      file: context/testing-standards.md
+      source: PROMPT-QUALITY-SPEC.md PQ-04
+      action: >
+        В testing-standards.md §3 — единый чеклист.
+        В test-audit и test-review SKILL.md — ссылка @context/testing-standards.md §3
+        вместо дублирования.
+      acceptance:
+        - "testing-standards.md §3 содержит единый Quality Checklist"
+        - "test-audit SKILL.md ссылается на testing-standards.md §3"
+        - "test-review SKILL.md ссылается на testing-standards.md §3"
+        - "Нет дублирования checklist в 3+ файлах"
+      depends_on: []
+      estimated_effort: S
+      tags: [prompt-quality, DRY, phase-6]
+
+    - id: PQ-11
+      title: "Убрать дубликат W8 (шаблон test-plan.md) из agent-workflow-core"
+      priority: P0
+      status: pending
+      phase: phase-6
+      file: skills/agent-workflow-core/SKILL.md
+      source: PROMPT-QUALITY-SPEC.md PQ-11
+      action: >
+        Заменить тело W8 шаблона test-plan.md в agent-workflow-core/SKILL.md ссылкой
+        на test-plan-template/SKILL.md. Шаблон уже существует как отдельный skill —
+        нет смысла дублировать 80 строк в core.
+      acceptance:
+        - "W8 в agent-workflow-core/SKILL.md содержит ссылку на test-plan-template/SKILL.md"
+        - "Нет дублирования ~80 строк шаблона в core"
+        - "Ссылка работает (test-plan-template/SKILL.md существует)"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, DRY, phase-6]
+
+    - id: PQ-13
+      title: "Заменить субъективные термины narrow/unusual/narrowest на verifiable формулировки"
+      priority: P1
+      status: pending
+      phase: phase-6
+      file: "skills/test-implementation, skills/test-review, skills/test-verification, skills/using-gigatest, agents/*"
+      source: PROMPT-QUALITY-SPEC.md PQ-13
+      action: >
+        Заменить 5 вхождений субъективных терминов на verifiable формулировки:
+        - "narrow scope" → "do not modify files outside the current task's artifact path"
+        - "valid but unusual pattern" → "pattern not listed in Forbidden Patterns (testing-standards §4)"
+        - "narrowest command" → "single most specific command for the claimed coverage area"
+        - "narrowest useful verification" → "most specific verification for the claimed requirement"
+        - "narrow clarifying question" → "single clarifying question limited to the specific ambiguity"
+      acceptance:
+        - "grep по project не находит 'narrow', 'unusual', 'narrowest' в SKILL.md и agents/"
+        - "Все замены сохраняют исходный смысл правила"
+      depends_on: []
+      estimated_effort: XS
+      tags: [prompt-quality, precision, phase-6]
 
 # ─────────────────────────────────────────────
 # BRIDGE — МОСТ GIGACRAFT ↔ GIGATEST

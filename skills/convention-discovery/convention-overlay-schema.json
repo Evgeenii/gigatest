@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ConventionOverlay",
+  "description": "Schema for project testing conventions discovered by convention-discovery agent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["metadata", "conventions"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generated_at", "scanned_files", "base_stack"],
+      "properties": {
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of when conventions were generated"
+        },
+        "scanned_files": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of test files scanned"
+        },
+        "scanned_modules": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of source code modules analyzed"
+        },
+        "base_stack": {
+          "type": "string",
+          "description": "Detected technology stack (e.g., 'React + TypeScript', 'Java + Spring')"
+        },
+        "version": {
+          "type": "string",
+          "description": "Convention overlay version (e.g., '1.0')",
+          "pattern": "^\\d+\\.\\d+$"
+        }
+      }
+    },
+    "conventions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stack_and_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of testing frameworks and tools used in the project"
+        },
+        "naming": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target", "pattern"],
+            "properties": {
+              "target": {
+                "type": "string",
+                "description": "What the naming convention applies to (e.g., 'describe-blocks', 'test-files', 'it-blocks')"
+              },
+              "pattern": {
+                "type": "string",
+                "description": "The discovered naming pattern (e.g., \"describe('ComponentName')\")"
+              },
+              "source": {
+                "type": "string",
+                "description": "Evidence source (e.g., '85% tests', 'CONTRIBUTING.md', 'code + docs')"
+              }
+            }
+          }
+        },
+        "test_structure": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Descriptions of test structure conventions (file organization, AAA usage, grouping)"
+        },
+        "mocking_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target", "approach"],
+            "properties": {
+              "target": {
+                "type": "string",
+                "description": "What is mocked (e.g., 'API calls', 'Redux store', 'external services')"
+              },
+              "approach": {
+                "type": "string",
+                "description": "How mocking is done (e.g., 'jest.mock() with manual mocks', 'nock for HTTP')"
+              }
+            }
+          }
+        },
+        "forbidden_patterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["pattern"],
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "The forbidden pattern code or description"
+              },
+              "reason": {
+                "type": "string",
+                "description": "Why this pattern is bad"
+              },
+              "alternative": {
+                "type": "string",
+                "description": "What to use instead (must not be empty if forbidden_patterns is present)"
+              }
+            }
+          }
+        },
+        "team_notes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "note": {
+                "type": "string",
+                "description": "Team observation or convention note"
+              },
+              "source": {
+                "type": "string",
+                "description": "Where this note came from (file path, documentation, or 'low-confidence')"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

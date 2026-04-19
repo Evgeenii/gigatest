@@ -1,9 +1,10 @@
 # Strategy — Навигация
 
-> Версия: 1.6 | Дата: 2026-04-18
+> Версия: 2.0 | Дата: 2026-04-19
 >
-> **Изменения v1.6:** PHASE-5-CONVENTION-DISCOVERY.md удалён — весь контент интегрирован в BLOCK-2-GIGATEST-GROWTH.md Phase 5 секцию.
-> Обновлены BLOCK-2 (v2.4) → полный контекст Phase 5: проблема, архитектура, workflow, риски, feasibility.
+> **Изменения v2.0:** Внешний ревью (2026-04-19): PQ-02/PQ-03/PQ-04 подтверждены done.
+> Phase 6: P0-A1..A5 + PQ-01..04 — все done. Остались PQ-11 (W8 dedup), PQ-13 (subjective terms).
+> Readiness Score скорректирован: 4.0 → 4.6. Языковая миграция заморожена.
 >
 > **Назначение:** Индекс стратегических документов GigaCraft ↔ GigaTest.
 > Все файлы — human-readable Markdown. Machine-readable бэклог — `backlog.yaml`.
@@ -16,6 +17,8 @@
 |------|----------|------------|
 | [`VISION.md`](VISION.md) | Все | Видение продуктов, JTBD-разделение, why two products, principles |
 | [`IMPLEMENTATION-SPEC.md`](IMPLEMENTATION-SPEC.md) | Агенты, Dev | **SDD**: технические конвенции, паттерны имплементации, чек-листы готовности |
+| [`ARCHITECTURE-SPEC.md`](ARCHITECTURE-SPEC.md) | Архитекторы, Dev | **Аудит**: структурные риски, edge cases, логические противоречия |
+| [`PROMPT-QUALITY-SPEC.md`](PROMPT-QUALITY-SPEC.md) | Техписатели, Ревьюеры | **Аудит промтов**: consistency, DRY, precision, conciseness |
 | [`BLOCK-1-GIGACRAFT-BRIDGE.md`](BLOCK-1-GIGACRAFT-BRIDGE.md) | GigaCraft dev | Микро-доработки в GigaCraft для моста (awareness + cross-workflow trigger) |
 | [`BLOCK-2-GIGATEST-GROWTH.md`](BLOCK-2-GIGATEST-GROWTH.md) | GigaTest dev | Стратегия развития GigaTest: prod-ready → overlays → тулинг → презентация → convention discovery |
 | [`READINESS-MATRIX.md`](READINESS-MATRIX.md) | Все | Матрица готовности GigaTest — оценки по 10 измерениям, гэпы, дорожная карта |
@@ -38,10 +41,12 @@
 ## Как пользоваться
 
 1. **Новым контрибьюторам** — начать с `VISION.md`, потом `BLOCK-2-GIGATEST-GROWTH.md`
-2. **Агентам-имплементерам** — `IMPLEMENTATION-SPEC.md` → `backlog.yaml` → чек-лист готовности (§11)
-3. **GigaCraft-разработчикам** — `BLOCK-1-GIGACRAFT-BRIDGE.md`
-4. **Агентам/CI** — `backlog.yaml` (валидация статусов, зависимостей)
-5. **Аналитика** — `VISION.md` + `READINESS-MATRIX.md` (актуальная)
+2. **Агентам-имплементерам (архитектура)** — `ARCHITECTURE-SPEC.md` → `IMPLEMENTATION-SPEC.md` → `backlog.yaml`
+3. **Агентам-имплементерам (prompt quality)** — `PROMPT-QUALITY-SPEC.md` → `IMPLEMENTATION-SPEC.md` → `backlog.yaml`
+4. **Агентам-имплементерам (Phase 0–5)** — `IMPLEMENTATION-SPEC.md` → `backlog.yaml` → чек-лист готовности (§11)
+5. **GigaCraft-разработчикам** — `BLOCK-1-GIGACRAFT-BRIDGE.md`
+6. **Агентам/CI** — `backlog.yaml` (валидация статусов, зависимостей)
+7. **Аналитика** — `VISION.md` + `READINESS-MATRIX.md` (актуальная)
 
 ---
 
@@ -49,6 +54,10 @@
 
 ```
 VISION.md        ← ЧТО и ЗАЧЕМ (видение, JTBD, killer features)
+     ↓
+ARCHITECTURE-SPEC.md  ← СТРУКТУРНЫЕ РИСКИ (архитектурный аудит)
+     ↓
+PROMPT-QUALITY-SPEC.md ← КАЧЕСТВО ПРОМТОВ (лингвистический аудит)
      ↓
 BLOCK-2-...      ← КОГДА (фазы, дорожная карта, включая Phase 5)
      ↓

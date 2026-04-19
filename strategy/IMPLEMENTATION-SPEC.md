@@ -1,10 +1,11 @@
 # IMPLEMENTATION-SPEC.md — Спецификация имплементации для агентов
 
-> Версия: 1.2 | Дата: 2026-04-18
-> Предыдущая версия: 1.1 (2026-04-18)
+> Версия: 1.4 | Дата: 2026-04-19
+> Предыдущая версия: 1.3 (2026-04-19)
 >
-> **Изменения v1.2:** Добавлены Phase 5 паттерны (§10), конвенции для convention files (§2, §12),
-> предложен W11 Convention Loading Protocol.
+> **Изменения v1.4:** Внешний ревью подтвердил PQ-02/PQ-03/PQ-04 done.
+> Обновлены §10 (Phase 6 таблица) и §11 (чек-листы). Добавлены PQ-11/PQ-13.
+> Языковая миграция §10 заморожена.
 >
 > **Назначение:** Software Design Document (SDD) для агентной реализации задач GigaTest.
 > Описывает «КАК» — технические решения, конвенции, паттерны имплементации.
@@ -568,6 +569,52 @@ plans/tests-e2e-example/
 > Зависимость: P5-023 требует P5-022 (schema следует за skill), P5-024 требует P5-023 (agent генерирует по schema).
 > P5-025 (W11) требует стабильных W1-W10 и может идти параллельно с P5-024.
 
+### Phase 6 — Architecture & Prompt Quality
+
+**Статус:** ✅ P0-A1..P0-A5 + PQ-01..PQ-04 выполнены. Внешний ревью подтвердил. Остались: PQ-11 (P0), PQ-13 (P1).
+
+| Задача | Паттерн | Статус |
+|--------|---------|--------|
+| P0-A1: W1.4 determinism | Заменить «или иную логику» → алгоритм: sort by priority desc, then id asc | ✅ done |
+| P0-A5: State Discovery v2 | W10.5: сортировать по session.last_updated (JSON timestamp, не mtime) | ✅ done |
+| P0-A3: test-plan.md content_hash | Добавить field в session, сравнивать hash при regenerate | ✅ done |
+| P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards | ✅ done |
+| P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order, content_hash | ✅ done |
+| PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнено вместе | ✅ done |
+| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | ✅ done (подтверждено внешним ревью) |
+| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | ✅ done (подтверждено внешним ревью) |
+| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | ✅ done (подтверждено внешним ревью) |
+| PQ-10: agent-workflow-core split | Вынести W10/W11 в отдельные skills | 🟡 **отложено** (делать только при 800+ строках или жалобах) |
+| **PQ-11: W8 dedup** | **Заменить W8 ссылкой на test-plan-template** | 🟡 **рекомендовано** |
+| PQ-12: QWEN.md sync | Синхронизировать импортированный W8.4 с content_hash | 🟡 deferred |
+| **PQ-13: Subjective terms** | **Заменить narrow/unusual/narrowest на verifiable формулировки** | 🟡 **рекомендовано** |
+| PQ-14: test-review Forbidden DRY | Ссылка на testing-standards §4 вместо дублирования | deferred |
+| PQ-15: R2/R3/R4.1 overlays DRY | Вынести общие правила в testing-standards §6 | 🔴 deferred (большой рефакторинг) |
+| PQ-16: W6 pre-flight DRY | agents/*.md → ссылка на agent-workflow-core W6 | deferred |
+| PQ-17: R9 Common Pitfalls | Добавить к Java/JS overlays | 🔴 deferred |
+
+**Рекомендация внешнего ревью:** вместо ручного исправления 20+ пунктов — написать `tools/validate-prompts.js` (статический линтер промтов). Это превратит значительную часть спеки в автоматическую проверку (§8 чек-лист, §9 конвенции).
+
+### Phase 7 — Language Migration (LLM-prompts → English) — ЗАМОРОЖЕНА
+
+> По конвенции PROMPT-QUALITY-SPEC §9.1: всё что читает LLM → английский, strategy/ → русский.
+> Внешнее ревью рекомендовало **отложить без даты**. Аргументы:
+> 1. Современные LLM обрабатывают русские промты эквивалентно английским
+> 2. Объём 486 строк × тонкости терминологии, нужен билингвальный review
+> 3. Ценность для пользователя = 0 (internal refactor без observable benefit)
+> Полный план: PROMPT-QUALITY-SPEC.md §10
+
+| Задача | Паттерн | Статус |
+|--------|---------|--------|
+| LANG-01: testing-standards.md EN | Перевести на английский (базовый файл) | pending |
+| LANG-02: QWEN.md EN | Перевести на английский (root prompt) | pending |
+| LANG-03: agents/*.md EN (6 файлов) | Перевести все agent-профили | pending |
+| LANG-04: Glossary | Создать глоссарий терминов перед переводом | pending |
+
+**Порядок:** LANG-04 → LANG-01 → LANG-02 → LANG-03
+
+> Зависимость: LANG-01 должен идти первым — от него ссылаются agent-файлы.
+
 ### Bridge — Мост
 
 | Задача | Паттерн |
@@ -606,7 +653,7 @@ plans/tests-e2e-example/
 - [ ] Primary Failure Modes: 5–8 пунктов
 - [ ] Rules: минимум 4 правила
 - [ ] Required Output описан
-- [ ] Ссылка на skill через `@./skills/...`
+- [ ] Ссылка на skill через `@./skills/...`.
 
 ### для schemas
 
@@ -614,6 +661,25 @@ plans/tests-e2e-example/
 - [ ] `$ref` composition используется для общих полей
 - [ ] Пример `plans/tests-audit-example/agent-state.json` валидируется
 - [ ] Enum `agent.type` синхронизирован с `agents/`
+
+### для Phase 6 (Architecture & Prompt Quality) — Раунд 1
+
+- [x] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику» **(PQ-01, выполнено)**
+- [x] Если изменены JSON Schema — обе схемы обновлены консистентно **(P0-A3, content_hash добавлен)**
+- [x] Если добавлен content_hash — примеры state файлов содержат новое поле **(выполнено)**
+- [x] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку **(PQ-03, выполнено)**
+- [x] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку **(PQ-04, выполнено)**
+
+### для Phase 6 — Раунд 2 (обновлено v5.1)
+
+- [ ] Если изменён agent-workflow-core — W10/W11 вынесены в отдельные skills. Файл ≤ 400 строк **(PQ-10, отложено)**
+- [ ] Если заменён W8 — ссылка на test-plan-template skill работает **(PQ-11, рекомендовано)**
+- [ ] Если изменён QWEN.md — импортированный блок использует content_hash подход **(PQ-12, deferred)**
+- [ ] Если grep по `narrow|unusual|narrowest` в SKILL.md и agents/ не находит вхождений **(PQ-13, рекомендовано)**
+
+### для Phase 7 — Language Migration — ЗАМОРОЖЕНА
+
+- [ ] Не начинать (см. §10, решение внешнего ревью)
 
 ---
 
@@ -761,4 +827,4 @@ W11. Convention Loading Protocol
 ---
 
 *Документ принадлежит: strategy/*
-*Смежные документы: VISION.md, BLOCK-2-GIGATEST-GROWTH.md, backlog.yaml, READINESS-MATRIX.md*
+*Смежные документы: VISION.md, BLOCK-2-GIGATEST-GROWTH.md, backlog.yaml, READINESS-MATRIX.md, ARCHITECTURE-SPEC.md, PROMPT-QUALITY-SPEC.md*

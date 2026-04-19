@@ -1,10 +1,11 @@
 # VISION.md — Видение продуктов GigaCraft и GigaTest
 
-> Версия: 3.0 | Дата: 2026-04-18
-> Предыдущая версия: 2.0 (2026-04-18)
+> Версия: 3.2 | Дата: 2026-04-19
+> Предыдущая версия: 3.1 (2026-04-19)
 >
-> **Изменения v3.0:** Добавлена Killer Feature 5.7 Project-Aware Conventions (Phase 5),
-> обновлены метрики успеха, обновлены анти-goals и JTBD.
+> **Изменения v3.2:** Внешний ревью подтвердило готовность Phase 5 (Convention Discovery).
+> Readiness Score скорректирован 4.0 → 4.6. Phase 6: P0-A1..A5 + PQ-01..04 done.
+> Остались PQ-11 (W8 dedup), PQ-13 (subjective terms). Языковая миграция заморожена.
 
 ---
 
@@ -19,6 +20,7 @@
 7. [Конкурентное позиционирование](#7-конкурентное-позиционирование)
 8. [Мост: interoperability, не merge](#8-мост-interoperability-не-merge)
 9. [Принципы принятия продуктовых решений](#9-принципы-принятия-продуктовых-решений)
+   - [P6. Determinism over flexibility](#9-принципы-принятия-продуктовых-решений)
 10. [Anti-goals](#10-anti-goals)
 11. [Полный цикл разработки](#11-полный-цикл-разработки)
 12. [Метрики успеха видения](#12-метрики-успеха-видения)
@@ -264,6 +266,11 @@ GigaTest умеет читать `.gigacraft/plans/*.md` и извлекать `
 Любое состояние системы должно быть понятно человеку без инструментов.
 `test-plan.md` всегда актуален. `agent-state.json` всегда читаем.
 
+### P6. Determinism over flexibility
+Алгоритмы выбора задач должны быть детерминированными. «Или иную логику» — запрещено.
+Разные запуски на одном state должны выбирать одинаковые задачи.
+LLM non-determinism допустим только на уровне генерации кода тестов, не на уровне workflow-решений.
+
 ---
 
 ## 10. Anti-goals
@@ -345,4 +352,4 @@ test-implementer (N итераций) → test-reviewer → test-verifier →
 ---
 
 *Документ принадлежит: strategy/*
-*Смежные документы: BLOCK-2-GIGATEST-GROWTH.md, READINESS-MATRIX.md, IMPLEMENTATION-SPEC.md*
+*Смежные документы: BLOCK-2-GIGATEST-GROWTH.md, READINESS-MATRIX.md, IMPLEMENTATION-SPEC.md, ARCHITECTURE-SPEC.md, PROMPT-QUALITY-SPEC.md*

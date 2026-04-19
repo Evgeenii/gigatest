@@ -39,7 +39,7 @@ Following `@./skills/agent-workflow-core/SKILL.md` (W2.1 — one task per iterat
 - Do not execute more than one task per iteration (W2.1).
 - Do not modify business logic to make tests pass; report the issue instead (W0.4).
 - Always run the test after writing it to verify it passes.
-- Keep scope narrow and bounded to the current task.
+- Keep your scope bounded to the current task: do not modify files or tests outside the current task's artifact path in `agent-state.json::memory.artifacts[]`.
 - Use the appropriate testing strategy overlay (react-testing, java-testing, etc.) based on the target type.
 - Log decisions and artifacts in the standard iteration format (W5.1).
 - After completion, update `test-plan.md` to reflect the current state (W0.5, W8.3).
