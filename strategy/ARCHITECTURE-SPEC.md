@@ -228,15 +228,15 @@ tests-audit-2026-04-19/
 
 ## 5. Паттерны реализации по приоритетам
 
-### P0 — Критично для продакшена
+### P0 — Критично для продакшена ✅ completed 2026-04-19
 
-| ID | Задача | Паттерн | Файлы для изменения |
-|----|--------|---------|---------------------|
-| P0-A1 | Устранить non-determinism в W1.4 | Заменить «или иную логику» на конкретный алгоритм: `сначала по priority (critical → high → medium → low), затем по order (id asc, лексикографически)` | `skills/agent-workflow-core/SKILL.md` W1.4 |
-| P0-A2 | Добавить семантическую валидацию | Создать `tools/validate-state.js` с проверками: `meta.done == count(status=done)`, `progress_percent = done/total_items * 100`, `history хронологичен` | `tools/validate-state.js` (существует как Phase 3, ускорить) |
-| P0-A3 | Протокол конфликтов test-plan.md | Добавить `content_hash` поле в session. Сравнивать hash при regenerate. Если hash ≠ computed → предупредить: `[AGENT] WARNING: test-plan.md has user modifications` | `skills/agent-workflow-core/SKILL.md` W8.4, обе схемы (добавить поле) |
-| P0-A4 | Мультистек: приоритизация оверлеев | Добавить W10.6: Layer Model → `файл → stack detection → конкретный overlay`. Если файл `.java` → Java overlay, если `.tsx` → React overlay. При отсутствии stack-specific fallback на testing-standards | `skills/agent-workflow-core/SKILL.md` W10.6 |
-| P0-A5 | State Discovery: выбор плана | Уточнить W10.5: сортировать по `session.last_updated` внутри JSON (не mtime). Если несколько с `active` → выбрать последний. Если none active → создать новый | `skills/agent-workflow-core/SKILL.md` W10.5 |
+| ID | Задача | Паттерн | Файлы для изменения | Статус |
+|----|--------|---------|---------------------|--------|
+| P0-A1 | Устранить non-determinism в W1.4 | Заменить «или иную логику» на конкретный алгоритм: `сначала по priority (critical → high → medium → low), затем по order (id asc, лексикографически)` | `skills/agent-workflow-core/SKILL.md` W1.4 | ✅ done |
+| P0-A2 | Добавить семантическую валидацию | Создать `tools/validate-state.js` с проверками: `meta.done == count(status=done)`, `progress_percent = done/total_items * 100`, `history хронологичен` | `tools/validate-state.js` | ✅ done |
+| P0-A3 | Протокол конфликтов test-plan.md | Добавить `content_hash` поле в session. Сравнивать hash при regenerate. Если hash ≠ computed → предупредить: `[AGENT] WARNING: test-plan.md has user modifications` | `skills/agent-workflow-core/SKILL.md` W8.4, обе схемы | ✅ done |
+| P0-A4 | Мультистек: приоритизация оверлеев | Добавить W10.6: Layer Model → `файл → stack detection → конкретный overlay`. Если файл `.java` → Java overlay, если `.tsx` → React overlay. При отсутствии stack-specific fallback на testing-standards | `skills/agent-workflow-core/SKILL.md` W10.6 | ✅ done |
+| P0-A5 | State Discovery: выбор плана | Уточнить W10.5: сортировать по `session.last_updated` внутри JSON (не mtime). Если несколько с `active` → выбрать последний. Если none active → создать новый | `skills/agent-workflow-core/SKILL.md` W10.5 | ✅ done |
 
 **Порядок выполнения:** P0-A1 → P0-A5 → P0-A3 → P0-A4 → P0-A2
 

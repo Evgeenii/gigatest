@@ -72,7 +72,11 @@ description: Core principles of planning, iterability, and state management for 
    - `assigned_agent` совпадает с `agent.type` (или `agent.role`).
    - `status == "pending"`.
    - Все `dependencies` имеют статус `done` или `skipped`.
-2. Выбрать первую по приоритету (или иную логику).
+2. **Детерминированный алгоритм выбора:**
+   - Отфильтрованные элементы сортируются по `priority` по убыванию: `critical` → `high` → `medium` → `low`.
+   - При равном приоритете — сортировка по `id` лексикографически по возрастанию (например, `T1` перед `T10`, `UI-001` перед `UI-002`).
+   - Выбрать первый элемент после сортировки.
+   - **Если список пуст** → `[AGENT] no pending tasks found. Nothing to execute.` → остановиться.
 3. Обновить `session.checkpoint`:
    ```json
    "checkpoint": {
@@ -331,27 +335,35 @@ description: Core principles of planning, iterability, and state management for 
 
 **Pre-flight sync check (выполняется каждым агентом перед началом работы):**
 
-1. Загрузить `agent-state.json` и проверить `session.last_updated`.
-2. Проверить, существует ли `test-plan.md` в той же директории.
-3. Если `test-plan.md` **отсутствует** → перейти к шагу 5.
-4. Если `test-plan.md` **существует** — сравнить его `mtime` (время модификации файла) с `session.last_updated` из JSON:
-   - Если `test-plan.md.mtime < agent-state.json.session.last_updated` → Markdown устарел, нужен регенерация.
-   - Если `test-plan.md.mtime >= agent-state.json.session.last_updated` → файлы синхронизированы, продолжить работу.
-5. Перегенерировать `test-plan.md` из `agent-state.json` по шаблону W8.1.
-6. Вывести предупреждение:
+1. Загрузить `agent-state.json` и извлечь `session.content_hash` (SHA-256 хеш сохранённого содержимого).
+2. Вычислить SHA-256 хеш текущего содержимого загруженного `agent-state.json` (без учёта поля `content_hash` — исключить его из хеша).
+3. Проверить, существует ли `test-plan.md` в той же директории.
+4. Если `test-plan.md` **отсутствует** → перейти к шагу 6.
+5. Если `test-plan.md` **существует** — сравнить вычисленный хеш с `session.content_hash`:
+   - Если computed hash ≠ `session.content_hash` → JSON был изменён после последней генерации markdown, нужна регенерация.
+   - Если computed hash == `session.content_hash` → файлы синхронизированы, продолжить работу.
+   - **Если обнаружены ручные правки:** Перед перезаписью проверить, отличается ли содержимое `test-plan.md` от последнего сохранённого хеша (если агент хранит `test_plan_md_hash` в `memory.context`). Если да → вывести предупреждение о возможных пользовательских правках.
+6. Перегенерировать `test-plan.md` из `agent-state.json` по шаблону W8.1.
+7. Вывести предупреждение:
    ```
    [AGENT] WARNING: test-plan.md was out of sync (or missing). Regenerated from agent-state.json.
    ```
-7. Продолжить работу.
+   Если перед этим были обнаружены ручные правки:
+   ```
+   [AGENT] WARNING: test-plan.md had user modifications. They will be overwritten. To preserve edits, add them to plan items' result.message instead.
+   ```
+8. Продолжить работу.
 
 **Когда регенерировать:**
 - При каждом старте новой сессии (pre-flight check в W6).
 - После каждого изменения `agent-state.json` (W8.3).
 - После любой операции, которая изменила plan (выбор задачи, завершение, блокировка).
 
-```
-[AGENT] WARNING: test-plan.md was out of sync. Regenerated from agent-state.json.
-```
+**После сохранения agent-state.json:**
+1. Обновить `session.last_updated`.
+2. Вычислить SHA-256 хеш содержимого (без поля `content_hash`) и записать в `session.content_hash`.
+3. Сохранить файл.
+4. Перегенерировать `test-plan.md`.
 
 ### W8.5 Относительные пути
 
@@ -410,8 +422,8 @@ State Discovery — это процесс автоконфигурации аг�
 
 ```
 1. Scan: Найти root project directory
-2. Detect: Определить tech stack (см. W10.2)
-3. Load: Загрузить релевантный context overlay (context/<stack>-testing.md)
+2. Detect: Определить tech stack (см. W10.2, W10.6 для мультистек)
+3. Load: Загрузить релевантный context overlay (см. W10.6 — file extension → overlay, или W10.4 для общего контекста)
 4. Check: Найти .gigacode/plans/ — есть ли существующие планы?
    ├─ ДА → Загрузить последний agent-state.json, определить текущий checkpoint
    └─ НЕТ → Перейти к шагу 5
@@ -468,16 +480,82 @@ State Discovery — это процесс автоконфигурации аг�
 
 Если сессия возобновляется (не первый запуск):
 
-1. Найти последний `.gigacode/plans/<task-type>-*/` по дате модификации
-2. Загрузить `agent-state.json`
-3. Проверить валидацию по схеме
-4. Проверить checkpoint:
-   - Если `checkpoint.plan_item_id != null` — есть незавершённая задача
-   - Если `session.status == 'paused'` — сессия была приостановлена
-5. Синхронизировать `test-plan.md` (W8.4)
-6. Продолжить с checkpoint или выбрать следующую pending задачу (W1.4)
+1. Найти все директории, соответствующие шаблону `.gigacode/plans/<task-type>-*/`.
+2. Загрузить `agent-state.json` из каждой директории.
+3. **Сортировка планов:**
+   - Сортировать по `session.last_updated` (ISO 8601 timestamp из JSON) по убыванию.
+   - При одинаковых `last_updated` — сортировать по имени директории лексикографически по убыванию (более новая дата предпочтительнее).
+   - **Не использовать `mtime` файловой системы** — оно не отражает семантику состояния.
+4. **Выбор плана:**
+   - Проверить `session.status` в отсортированном порядке:
+     - Если найден план с `session.status == "paused"` → загрузить его (пользователь явно приостановил эту работу).
+     - Если план с `session.status == "active"` → загрузить первый (самый свежий по `last_updated`).
+     - Если все планы имеют `session.status == "done"` или `session.status == "cancelled"` → перейти к шагу 6 (создать новый план).
+5. Загрузить выбранный `agent-state.json`, проверить валидацию по схеме.
+6. Проверить checkpoint:
+   - Если `checkpoint.plan_item_id != null` — есть незавершённая задача (см. EC-5: если задача `in_progress`, решить — продолжить её или пропустить).
+   - Если `session.status == 'paused'` — сессия была приостановлена, логировать: `[AGENT] resuming paused session from checkpoint`.
+7. Синхронизировать `test-plan.md` (W8.4).
+8. Продолжить с checkpoint или выбрать следующую pending задачу (W1.4).
 
-**Правило:** Если `agent-state.json` invalid -- не продолжать, сообщить об ошибке.
+**Правило:** Если `agent-state.json` invalid — не продолжать, сообщить об ошибке.
+
+**Правило:** Если все найденные планы завершены (`status: "done"`) — создать новый план, а не переиспользовать старый.
+
+---
+
+### W10.6 Multi-Stack Layer Model
+
+**Назначение:** Определить порядок загрузки и разрешения конфликтов при наличии нескольких стеков в одном проекте (например, React frontend + Java backend).
+
+**Стеко-детекция по тестируемому файлу:**
+
+Когда агент пишет или запускает тест, он определяет overlay по **файловому расширению тестируемого исходника**:
+
+| Расширение тестируемого файла | Stack | Context Overlay |
+|-------------------------------|-------|-----------------|
+| `.tsx`, `.jsx`, `.vue`, `.svelte` | React/Frontend | `react-testing.md` |
+| `.java` | Java | `java-testing.md` |
+| `.ts`, `.js` (без JSX/TSX) | JS/TS | `js-ts-testing.md` |
+| `.py` | Python | `python-testing.md` |
+| `.go` | Go | `go-testing.md` |
+| `.rs` | Rust | (future) |
+| `.rb` | Ruby | (future) |
+
+**Алгоритм выбора overlay при тестировании:**
+
+```
+1. Определить расширение тестируемого исходного файла (не теста, а исходника).
+2. Сопоставить с таблицей W10.6 → выбрать ONE overlay.
+3. Если файл не сопоставлен → fallback на `testing-standards.md`.
+4. Применить правила выбранного overlay к текущему тесту.
+```
+
+**Приоритет слоёв (Layer Model):**
+
+```
+project conventions (W11) > stack overlay (W10.6) > testing-standards.md (base)
+```
+
+**Мультистек-проекты:**
+
+- При **написании/запуске одного теста** — применяется **один** overlay (по расширению файла), а не все сразу.
+- При **аудите** (test-audit) — агент собирает полный стек по всем расширениям из проекта, записывает в `test_plan.target_stack: "multi-stack"` и тестирует файлы из каждого стека с соответствующим overlay.
+- **Нет конфликтов правил**, потому что каждый тест привязан к одному исходнику → одному overlay.
+
+**Логирование:**
+
+```
+[AGENT] stack detection: testing <file.tsx> → React overlay (react-testing.md)
+```
+
+Или:
+
+```
+[AGENT] stack detection: testing <service.go> → Go overlay (go-testing.md)
+```
+
+**Правило:** Если один тест проверяет интеграцию двух стеков (напр. e2-тест React → Java API) — применять overlay **по типу точки входа** (если тест начинается с UI → React overlay, если с API → Java overlay).
 
 ---
 
@@ -563,10 +641,14 @@ custom (project-conventions) > stack overlay (context/<stack>-testing.md) > test
 
 ## 🔄 Версионирование
 
-**Skill Version**: 2.5 (gigatest)
+**Skill Version**: 2.9 (gigatest)
 **Domain**: Agent orchestration & workflow management
 **Last Updated**: 2026-04-19
 
 **История изменений для gigatest**:
+- v2.9 (gigatest): P0-A4 — Добавлен W10.6 Multi-Stack Layer Model. File extension → один конкретный overlay. Мультистек аудит через target_stack: multi-stack.
+- v2.8 (gigatest): P0-A3 — Добавлено `session.content_hash` (SHA-256). W8.4 переписан: сравнение по hash вместо mtime. Предупреждение о user modifications. agent-state-schema.json обновлена.
+- v2.7 (gigatest): P0-A5 — W10.5 переписан: сортировка по JSON `session.last_updated` (не mtime), выбор по priority (paused > active > done), same-timestamp fallback по имени директории.
+- v2.6 (gigatest): P0-A1 — W1.4 заменён «или иную логику» на детерминированный алгоритм (priority desc → id asc). Добавлен empty-list check.
 - v2.5 (gigatest): Добавлен W11 — Convention Loading Protocol. Layer model (custom > stack > base), conflict resolution, logging.
 - v2.4 (gigatest): Адаптация для тестового workflow. Имена файлов: `agent-state.json` + `test-plan.md`. Тестово-специфичные поля в схеме. Типы агентов заменены на тестовые. Режимы сессии: `audit`, `implementation`, `review`, `verification`. Валидация по `agent-state-schema.json` и `test-plan-state-schema.json`.

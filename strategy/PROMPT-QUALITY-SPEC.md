@@ -148,16 +148,16 @@
 
 ### P0 — Критично (влияют на детерминизм и корректность агента)
 
-| ID | Задача | Паттерн | Файлы для изменения |
-|----|--------|---------|---------------------|
-| PQ-01 | Устранить амбигуитет P2: «или иную логику» | Заменить: `if приоритеты равны → order by id ascending (лексикографически)` | `skills/agent-workflow-core/SKILL.md` W1.4 |
-| PQ-02 | Устранить амбигуитет P1: «менее 3 → downgrade» | Указать: `менее 3 → coverage_status: "partial"`. Ссылка на R4 overlay | `skills/test-audit/SKILL.md` Phase 2 |
-| PQ-03 | Устранить дублирование Stack Detection (D4) | В QWEN.md заменить таблицу на: `Stack detection алгоритг → см. agent-workflow-core W10.2` | `QWEN.md` |
-| PQ-04 | Устранить дублирование Quality Checklists (D2) | В testing-standards.md §3 — единый чеклист. В test-audit и test-review — ссылка `@context/testing-standards.md §3` | `context/testing-standards.md`, `skills/test-audit/SKILL.md`, `skills/test-review/SKILL.md` |
+| ID | Задача | Паттерн | Файлы для изменения | Статус |
+|----|--------|---------|---------------------|--------|
+| PQ-01 | Устранить амбигуитет P2: «или иную логику» | Заменить: `if приоритеты равны → order by id ascending (лексикографически)` | `skills/agent-workflow-core/SKILL.md` W1.4 | ✅ done (executed together with P0-A1) |
+| PQ-02 | Устранить амбигуитет P1: «менее 3 → downgrade» | Указать: `менее 3 → coverage_status: "partial"`. Ссылка на R4 overlay | `skills/test-audit/SKILL.md` Phase 2 | pending |
+| PQ-03 | Устранить дублирование Stack Detection (D4) | В QWEN.md заменить таблицу на: `Stack detection алгоритг → см. agent-workflow-core W10.2` | `QWEN.md` | pending |
+| PQ-04 | Устранить дублирование Quality Checklists (D2) | В testing-standards.md §3 — единый чеклист. В test-audit и test-review — ссылка `@context/testing-standards.md §3` | `context/testing-standards.md`, `skills/test-audit/SKILL.md`, `skills/test-review/SKILL.md` | pending |
 
-**Порядок выполнения:** PQ-03 → PQ-04 → PQ-01 → PQ-02
+**Порядок выполнения PQ:** PQ-02 → PQ-03 → PQ-04
 
-> Зависимость: PQ-04 требует стабильной формулировки чеклиста в testing-standards.md. PQ-01 и PQ-02 независимы.
+> Зависимость: PQ-04 требует стабильной формулировки чеклиста в testing-standards.md. PQ-01 выполнен вместе с P0-A1.
 
 ---
 

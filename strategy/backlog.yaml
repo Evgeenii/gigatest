@@ -431,7 +431,8 @@ phase-6:
     - id: P0-A1
       title: "Устранить non-determinism в W1.4"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/agent-workflow-core/SKILL.md
       source: ARCHITECTURE-SPEC.md P0-A1
@@ -448,7 +449,8 @@ phase-6:
     - id: P0-A2
       title: "Добавить семантическую валидацию state"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: tools/validate-state.js
       source: ARCHITECTURE-SPEC.md P0-A2
@@ -467,7 +469,8 @@ phase-6:
     - id: P0-A3
       title: "Протокол конфликтов test-plan.md"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/agent-workflow-core/SKILL.md
       source: ARCHITECTURE-SPEC.md P0-A3
@@ -486,7 +489,8 @@ phase-6:
     - id: P0-A4
       title: "Мультистек: приоритизация оверлеев"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/agent-workflow-core/SKILL.md
       source: ARCHITECTURE-SPEC.md P0-A4
@@ -504,7 +508,8 @@ phase-6:
     - id: P0-A5
       title: "State Discovery: выбор плана"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/agent-workflow-core/SKILL.md
       source: ARCHITECTURE-SPEC.md P0-A5
@@ -523,7 +528,8 @@ phase-6:
     - id: PQ-01
       title: "Устранить амбигуитет 'или иную логику' (W1.4)"
       priority: P0
-      status: pending
+      status: done
+      completed_at: "2026-04-19T14:00:00Z"
       phase: phase-6
       file: skills/agent-workflow-core/SKILL.md
       source: PROMPT-QUALITY-SPEC.md PQ-01

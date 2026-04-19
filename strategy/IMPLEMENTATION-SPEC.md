@@ -570,23 +570,23 @@ plans/tests-e2e-example/
 
 ### Phase 6 — Architecture & Prompt Quality
 
-| Задача | Паттерн |
-|--------|---------|
-| P0-A1: W1.4 determinism | Заменить «или иную логику» → алгоритм: sort by priority desc, then id asc |
-| P0-A5: State Discovery v2 | W10.5: сортировать по session.last_updated (JSON timestamp, не mtime) |
-| P0-A3: test-plan.md content_hash | Добавить field в session, сравнивать hash при regenerate |
-| P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards |
-| P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order |
-| PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнить вместе |
-| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 |
-| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 |
-| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка |
+**Статус:** ✅ P0-A1..P0-A5 + PQ-01 завершены (2026-04-19)
 
-**Порядок выполнения P0:** P0-A1+PQ-01 → P0-A5 → P0-A3 → P0-A4 → P0-A2 → PQ-02 → PQ-03 → PQ-04
+| Задача | Паттерн | Статус |
+|--------|---------|--------|
+| P0-A1: W1.4 determinism | Заменить «или иную логику» → алгоритм: sort by priority desc, then id asc | ✅ done |
+| P0-A5: State Discovery v2 | W10.5: сортировать по session.last_updated (JSON timestamp, не mtime) | ✅ done |
+| P0-A3: test-plan.md content_hash | Добавить field в session, сравнивать hash при regenerate | ✅ done |
+| P0-A4: Multi-stack overlay | W10.6: file extension → конкретный overlay, fallback на testing-standards | ✅ done |
+| P0-A2: Semantic validation | tools/validate-state.js: meta.done == count(done), progress formula, history order, content_hash | ✅ done |
+| PQ-01: W1.4 ambiguity fix | Пересекается с P0-A1 — выполнено вместе | ✅ done |
+| PQ-02: audit downgrade clarity | «менее 3 → coverage_status: partial», ссылка на overlay R4 | pending |
+| PQ-03: Stack Detection DRY | QWEN.md: заменить таблицу на ссылку → agent-workflow-core W10.2 | pending |
+| PQ-04: Quality Checklist DRY | testing-standards.md §3 = source, test-audit/test-review → ссылка | pending |
 
-> Зависимость: P0-A1 и PQ-01 — один файл, делать за одну итерацию.
-> P0-A3 требует обновления обеих JSON Schema.
-> Остальные P0 независимы.
+**Порядок выполнения PQ:** PQ-02 → PQ-03 → PQ-04
+
+> Все архитектурные P0 закрыты. Оставшиеся PQ-02..PQ-04 — prompt-quality, независимые.
 
 ### Bridge — Мост
 
@@ -637,11 +637,11 @@ plans/tests-e2e-example/
 
 ### для Phase 6 (Architecture & Prompt Quality)
 
-- [ ] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику»
-- [ ] Если изменены JSON Schema — обе схемы обновлены консистентно
+- [x] Если изменён W1.4 — grep по всему проекту подтверждает удаление «или иную логику» **(выполнено)**
+- [x] Если изменены JSON Schema — обе схемы обновлены консистентно **(выполнено: content_hash добавлен)**
 - [ ] Если добавлен content_hash — примеры state файлов содержат новое поле
-- [ ] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку
-- [ ] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку
+- [ ] Если изменён QWEN.md — Stack Detection таблица заменена на ссылку **(pending PQ-03)**
+- [ ] Если изменён testing-standards.md §3 — test-audit/test-review SKILL.md заменены на ссылку **(pending PQ-04)**
 
 ---
 
