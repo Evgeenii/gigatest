@@ -12,8 +12,8 @@
 
 ## Статус готовности
 
-> **Readiness Score: 4.9/5** — Phase 0–4 завершены ✅
-> 5 агентов, 7 skills, 5 stack overlays, CLI-утилиты.
+> **Readiness Score: 4.6/5** — Phase 0–5 завершены ✅
+> 6 агентов, 9 skills, 5 stack overlays, CLI-утилиты, convention discovery.
 > Подробности: [READINESS-MATRIX.md](strategy/READINESS-MATRIX.md)
 
 ---
@@ -25,7 +25,8 @@
 - [Установка](#установка)
 - [Быстрый старт](#быстрый-старт)
 - [Как это работает](#как-это-работает)
-- [5 skills — 5 этапов](#5-skills--5-этапов)
+- [Skills — полный workflow](#skills--полный-workflow)
+- [Convention Discovery](#convention-discovery)
 - [Stack-оверлеи](#stack-оверлеи)
 - [Как работают планы](#как-работают-планы)
 - [CLI-утилиты](#cli-утилиты)
@@ -49,24 +50,24 @@ GigaTest построен по принципу **skills-first**: навыки (
         ▼
    QWEN.md (точка входа)
         │
-        ├── context/testing-standards.md   ← базовые стандарты
-        ├── skills/using-gigatest/SKILL.md ← маршрутизатор
-        └── skills/agent-workflow-core/    ← ядро workflow
+        ├── context/testing-standards.md       ← базовые стандарты
+        ├── skills/using-gigatest/SKILL.md     ← маршрутизатор
+        └── skills/agent-workflow-core/        ← ядро workflow
                 │
                 ▼
         using-gigatest анализирует intent
         и направляет в нужный skill
                 │
-        ┌───────┼───────┬──────────┬──────────┐
-        ▼       ▼       ▼          ▼          ▼
-   test-    test-   test-      test-      test-
-   audit    impl    review     verify     strategy
-   (skill)  (skill) (skill)    (skill)    (skill)
-        │       │       │          │          │
-        └───┬───┴───┬───┴────┬─────┘          │
-            ▼       ▼        ▼                ▼
-         Агенты обеспечивают
-         ролевой контекст и
+        ┌───────┼───────┬──────────┬──────────┬──────────────┐
+        ▼       ▼       ▼          ▼          ▼              ▼
+   test-    test-   test-      test-      test-    convention-
+   audit    impl    review     verify     strategy discovery / review
+   (skill)  (skill) (skill)    (skill)    (skill)    (skills)
+        │       │       │          │          │              │
+        └───┬───┴───┬───┴────┬─────┘          │              │
+            ▼       ▼        ▼                ▼              ▼
+         Агенты обеспечивают       Custom conventions
+         ролевой контекст и        загружаются через W11
          failure modes
 ```
 
@@ -77,8 +78,9 @@ GigaTest построен по принципу **skills-first**: навыки (
 | **QWEN.md** | Точка входа — загружает router + standards + core | `QWEN.md` |
 | **Router skill** | Анализирует ваш запрос, направляет в нужный skill | `skills/using-gigatest/SKILL.md` |
 | **Workflow skills** | Методология: процесс, правила, exit conditions, forbidden patterns | `skills/test-{audit,implementation,review,verification}/SKILL.md` |
-| **Agent profiles** | Ролевой контекст: failure modes, выходной формат, правила поведения | `agents/test-{auditor,implementer,reviewer,verifier,strategist}.md` |
-| **Core skill** | Итеративный цикл, двойная документация, JSON Schema | `skills/agent-workflow-core/SKILL.md` + схемы |
+| **Convention skills** | Обнаружение и ревью конвенций проекта | `skills/convention-{discovery,review}/SKILL.md` |
+| **Agent profiles** | Ролевой контекст: failure modes, выходной формат, правила поведения | `agents/test-{auditor,implementer,reviewer,verifier,strategist,convention-discoverer}.md` |
+| **Core skill** | Итеративный цикл, двойная документация, JSON Schema, W11 conventions | `skills/agent-workflow-core/SKILL.md` + схемы |
 | **Context overlays** | Стек-специфичные стратегии тестирования | `context/{react,java,js-ts,python,go}-testing.md` |
 
 > **Вы не работаете с агентами напрямую.** Вы описываете задачу, router выбирает
@@ -176,6 +178,8 @@ Router анализирует intent пользователя и направл�
 | «ревью тестов», «проверь качество» | `test-review` | Проверит тесты по чек-листу |
 | «запусти тесты», «проверь что проходит» | `test-verification` | Запустит тесты, соберёт доказательства |
 | «стратегия тестирования», «как тестировать?» | `test-strategy` | Определит цели и подход к тестированию |
+| «найди конвенции», «какой стиль тестов?» | `convention-discovery` | Сканирует проект, извлекает конвенции |
+| «проведи ревью конвенций» | `convention-review` | Проверит обнаруженные конвенции |
 
 ### State Discovery (W10)
 
@@ -185,7 +189,7 @@ Router анализирует intent пользователя и направл�
 
 ---
 
-## 5 skills — 5 этапов
+## Skills — полный workflow
 
 ```
    Strategy              Нет тестов              Тесты есть
@@ -205,6 +209,18 @@ Router анализирует intent пользователя и направл�
                    │verification│     │review     │
                    │(skill)     │     │(skill)    │
                    └───────────┘     └───────────┘
+
+  Есть тесты → нужно узнать стиль проекта?
+      │
+      ▼
+┌───────────────────┐     ┌───────────────────┐
+│ convention-       │────▶│ convention-       │
+│ discovery (skill) │     │ review (skill)    │
+└───────────────────┘     └───────────────────┘
+         │
+         ▼
+  .gigacode/conventions/
+  (W11 Convention Loading)
 ```
 
 | Этап | Skill | Что делает | Результат |
@@ -214,10 +230,41 @@ Router анализирует intent пользователя и направл�
 | Implementation | `test-implementation` | Выполняет **одну** задачу из плана, пишет тесты, проверяет | Тестовый файл + обновлённый план |
 | Review | `test-review` | Проверяет качество тестов против чек-листа и `quality_gate` | Список находок с severity |
 | Verification | `test-verification` | Запускает тесты, проверяет что план выполнен | Отчёт с доказательством |
+| Convention Discovery | `convention-discovery` | Сканирует тесты проекта, извлекает naming, mocking, structure конвенции | `project-conventions.json` + `.md` |
+| Convention Review | `convention-review` | Human-in-the-loop валидация обнаруженных конвенций | Approved/rejected conventions |
 
 > **Verification gate:** перед пометкой задачи как `done` любой skill автоматически
 > запускает verification — это встроенная контрольная точка. Для отдельной комплексной
 > проверки используйте skill `test-verification` напрямую.
+
+---
+
+## Convention Discovery
+
+GigaTest умеет **автоматически обнаруживать** конвенции тестирования из вашего проекта.
+Если в проекте уже есть тесты — нет смысла писать новые «по-новому». Агент научится
+писать тесты в стиле, принятом в вашей команде.
+
+```
+# 1. Обнаружение конвенций
+Вы: «найди конвенции тестирования в этом проекте»
+→ convention-discovery сканирует тесты, конфиги, документацию, код
+→ Извлекает: naming, structure, mocking, forbidden patterns
+→ Результат: .gigacode/conventions/project-conventions.json + .md
+
+# 2. Ревью (human-in-the-loop)
+Вы: «проведи ревью обнаруженных конвенций»
+→ convention-review проверяет полноту, конфликт с testing-standards
+→ Approved → conventions загружаются через W11 автоматически
+
+# 3. Использование
+→ Все test-agенты пишут тесты в стиле проекта
+→ Naming, mocking, structure — как принято в команде
+```
+
+**Приоритет:** `custom conventions > stack overlay > testing-standards.md`
+
+Подробности: [docs/CONVENTION-DISCOVERY.md](docs/CONVENTION-DISCOVERY.md)
 
 ---
 
@@ -391,7 +438,7 @@ extensions/gigatest-0.1.0/
 ├── QWEN.md                          # Точка входа (загружает router + standards + core)
 ├── README.md                        # Эта документация
 │
-├── skills/                          # 7 skills — основной интерфейс
+├── skills/                          # 9 skills — основной интерфейс
 │   ├── using-gigatest/              # ─ Маршрутизатор (router)
 │   │   └── SKILL.md
 │   ├── test-audit/                  # ─ Аудит + генерация плана
@@ -402,19 +449,27 @@ extensions/gigatest-0.1.0/
 │   │   └── SKILL.md
 │   ├── test-verification/           # ─ Verification gate + независимая верификация
 │   │   └── SKILL.md
-│   ├── agent-workflow-core/         # ─ Ядро: стейт, итерации, JSON Schema
+│   ├── test-strategy/               # ─ Стратегия тестирования
+│   │   └── SKILL.md
+│   ├── agent-workflow-core/         # ─ Ядро: стейт, итерации, JSON Schema, W11
 │   │   ├── SKILL.md
 │   │   ├── agent-state-schema.json
 │   │   └── test-plan-state-schema.json
-│   └── test-plan-template/          # ─ Шаблон test-plan.md
+│   ├── test-plan-template/          # ─ Шаблон test-plan.md
+│   │   └── SKILL.md
+│   ├── convention-discovery/        # ─ Обнаружение конвенций проекта
+│   │   ├── SKILL.md
+│   │   └── convention-overlay-schema.json
+│   └── convention-review/           # ─ Ревью обнаруженных конвенций
 │       └── SKILL.md
 │
-├── agents/                          # 5 агентов — ролевые профили (не точка входа)
+├── agents/                          # 6 агентов — ролевые профили (не точка входа)
 │   ├── test-auditor.md
 │   ├── test-implementer.md
 │   ├── test-reviewer.md
 │   ├── test-strategist.md
-│   └── test-verifier.md
+│   ├── test-verifier.md
+│   └── convention-discoverer.md
 │
 ├── commands/                        # Fallback команды (тонкие редиректы на skills)
 │   ├── audit-tests.md
@@ -449,7 +504,8 @@ extensions/gigatest-0.1.0/
 │   ├── DEMO.md
 │   ├── COMPARISON.md
 │   ├── METRICS.md
-│   └── TEMPLATE-SYNTAX.md
+│   ├── TEMPLATE-SYNTAX.md
+│   └── CONVENTION-DISCOVERY.md
 │
 └── strategy/                        # Стратегические документы
     ├── README.md
@@ -550,5 +606,9 @@ A: React, Java/Spring Boot, JS/TS (Node.js), Python (FastAPI/Django/Flask), Go.
 
 **Q: GigaTest production-ready?**
 
-A: Да. Readiness Score: 4.9/5. Все 5 skills, 5 агентов, 5 оверлеев, CLI-утилиты — работают.
+A: Да. Readiness Score: 4.6/5. Все 9 skills, 6 агентов, 5 оверлеев, CLI-утилиты, convention discovery — работают.
 Подробности: [strategy/READINESS-MATRIX.md](strategy/READINESS-MATRIX.md).
+
+**Q: Что такое Convention Discovery?**
+
+A: Автоматическое обнаружение конвенций тестирования из вашего проекта. Сканирует существующие тесты, конфиги, документацию и код, извлекает закономерности (naming, mocking, structure) и создаёт convention overlay. После review и approve все test-agенты пишут тесты в стиле вашей команды. Подробности: [docs/CONVENTION-DISCOVERY.md](docs/CONVENTION-DISCOVERY.md).

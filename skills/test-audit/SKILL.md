@@ -23,27 +23,93 @@ Perform a comprehensive analysis of existing tests, identify coverage and qualit
 
 ### Phase 2: Quality Analysis
 
-For each test file, evaluate quality using the mandatory checklist:
+For each test file, evaluate quality using the **mandatory checklist** and the **Coverage Scoring Algorithm** below.
 
-#### Quality Checklist
+#### 2.1 Load Context
 
-Базовая checklist — `@context/testing-standards.md §3`. Применить ко **всем** тестам.
+1. Загрузить `@context/testing-standards.md §3` (обязательная база — применяется ко **всем** тестам).
+2. Загрузить `context/<stack>-testing.md` overlay по W10.2 (определяет стек).
+3. Загрузить **R4.1 Full Coverage Criteria** из overlay — это **authoritative** определение "full" для данного стека. Если overlay не имеет R4.1 — использовать fallback из §2.4.
 
-Ниже — **delta** (дополнительные вопросы аудита + классификация):
+#### 2.2 Run Checklist (enforced output)
 
-- [ ] Сколько `it`/`test`/`@Test`/`def test_`/`func Test*` блоков? (менее 3 → `coverage_status: "partial"`. Stack-специфичные уточнения — в `context/<stack>-testing.md` R4)
-- [ ] Для UI-тестов: есть ли `userEvent`/`fireEvent`? Нет → `coverage_status: "partial"`
-- [ ] Для backend/API тестов: есть ли интеграционный HTTP-вызов (supertest/TestClient/httptest)? Нет → `coverage_status: "partial"`
-- [ ] Оценить по Coverage Classification таблице ниже
+Для **каждого** тестового файла агент **обязан** вывести полный чеклист с отметками:
 
-#### Coverage Classification
+```yaml
+[AUDIT CHECKLIST] <file_path>
+  [✓|✗] Q1: No internal state assertions
+  [✓|✗] Q2: Asserts check observable behavior
+  [✓|✗] Q3: One test = one scenario
+  [✓|✗] Q4: Test names describe behavior
+  [✓|✗] Q5: No excessive mocking
+  [✓|✗] Q6: Happy path covered
+  [✓|✗] Q7: Error handling covered
+  [✓|✗] Q8: Async behavior handled (if applicable)
+  [✓|✗] Q9: Branch coverage (if/else, conditionals)
+```
 
-| Status | Criteria |
-|--------|----------|
-| **full** | Quality checklist passes entirely; all branches, edge cases, and async behavior covered |
-| **partial** | Tests exist but miss 2+ checklist items |
-| **invalid** | Only snapshots without behavioral assertions, or tests that fail on execution |
-| **missing** | No test file exists for this target |
+**Stack-specific checklist items** из `context/<stack>-testing.md` R4.2 добавляются к базовым Q1–Q9:
+
+| Стек | Дополнительные пункты |
+|------|----------------------|
+| React | Q10: `userEvent`/`fireEvent` для компонентов с кнопками/инпутами |
+| Java | Q10: `@WebMvcTest`/`@MockBean` для контроллеров, `verify()` для моков |
+| JS/TS | Q10: HTTP integration test (supertest/TestClient) для endpoints |
+| Python | Q10: `TestClient`/`pytest.raises` для endpoint'ов и сервисов |
+| Go | Q10: `httptest.NewRecorder` для handlers, `mock.Assert*` для сервисов |
+
+#### 2.3 Apply Downgrade Rules (BEFORE scoring)
+
+Агент **обязан** применить downgrade **до** evaluation Coverage Scoring Algorithm. Downgrade overrides final status:
+
+| Condition | Downgrade To |
+|-----------|--------------|
+| Только `toMatchSnapshot()` / `assert_eq!(output, snapshot)` без behavioral assertions | `invalid` |
+| Тестовый файл существует, но содержит 0 test blocks (`it`/`test`/`@Test`/`def test_`/`func Test`) | `invalid` |
+| Тесты fail on execution | `invalid` |
+| Для UI-компонента (forms, buttons, views): нет user interaction test (`userEvent`, `fireEvent`, эквивалент) | `partial` |
+| Для HTTP endpoint/handler: нет integration test (supertest, TestClient, httptest, эквивалент) | `partial` |
+| Для async операций (API calls, DB queries, timers): нет async/wait check (`await findBy*`, `waitFor`, `assertThrows`, эквивалент) | `partial` |
+| Количество test blocks < R4.1 minimum для данного типа цели (напр. `< 3 it` для сервиса с ветвлениями) | `partial` |
+
+**Правило:** Downgrade применяется **автоматически** при обнаружении conditions. Агент не может его переопределить субъективной оценкой.
+
+#### 2.4 Coverage Scoring Algorithm
+
+Если downgrade не применён на §2.3, агент вычисляет статус алгоритмически:
+
+```
+Input: checklist_result = {passed_count, failed_count, failed_items[]}
+       overlay_r4.1 = {criteria_met_count, criteria_total}  (если применим)
+
+Algorithm:
+1. failed_count == 0 AND (overlay_r4.1 отсутствует OR criteria_met_count == criteria_total)
+   → return status="full"
+
+2. failed_count >= 1 OR (overlay_r4.1 присутствует AND criteria_met_count < criteria_total)
+   → return status="partial"
+
+3. Fallback: status="partial"
+```
+
+**Результат всегда сопровождается:**
+```yaml
+[AUDIT SCORE] <file_path>
+  passed: <N>
+  failed: <M>
+  failed_items: [<item1>, <item2>]
+  overlay_full_criteria: <X>/<Y> met
+  → coverage_status: <full | partial>
+```
+
+#### Coverage Status Reference
+
+| Status | Определение |
+|--------|-------------|
+| **full** | Checklist: 0 failed items. Overlay R4.1: все criteria met. Downgrade rules: none triggered. |
+| **partial** | Checklist: 1+ failed items. Testable gaps exist. `missing_requirements` must be populated. |
+| **invalid** | Tests exist but are meaningless (snapshot-only, no assertions, or fail on execution). |
+| **missing** | No test file exists for this target. |
 
 ### Phase 3: Prioritization
 
@@ -92,6 +158,8 @@ Output the audit summary in the standard format:
 - Mark blocked items (e.g., component can't be resolved) and continue; do not halt execution.
 - Output the final report grouped by priority: critical → high → medium → low.
 - After audit completion, present the plan summary and ask for user confirmation before proceeding to `test-implementation`.
+- For targets with existing tests, always output the full checklist with ✓/✗ marks (Phase 2 §2.2) before assigning coverage_status.
+- Apply downgrade rules (Phase 2 §2.3) automatically before Coverage Scoring Algorithm. Do not override downgrade with subjective evaluation.
 - Both `agent-state.json` and `test-plan.md` can be committed to git — `test-plan.md` gives human-readable diff in PRs.
 
 ## Output Format
@@ -121,6 +189,9 @@ And a `test-plan.md` with grouped tasks by priority, ready for iterative executi
 - [ ] `plan.meta.progress_percent` отражает что audit завершён (может быть 0% если нет выполненных задач, но count_by_status заполнен)
 - [ ] `memory.history` содержит минимум записи `started` и `completed` (audit stages)
 - [ ] Audit summary output содержит `[AUDIT] total/targets/full/partial/invalid/missing`
+- [ ] Для каждого audited файла выведен `[AUDIT CHECKLIST]` с ✓/✗ отметками по всем пунктам (Phase 2 §2.2)
+- [ ] Для каждого partial/invalid файла выведен `[AUDIT SCORE]` с failed_items (Phase 2 §2.4)
+- [ ] Downgrade rules применены где применимы (Phase 2 §2.3)
 
 ## Forbidden Patterns
 

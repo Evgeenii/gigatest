@@ -31,6 +31,7 @@ Primary failure modes to avoid:
 - losing execution when one target fails to resolve — mark and continue
 - producing a plan without actionable tasks and `quality_gate` criteria
 - creating `agent-state.json` without generating `test-plan.md` (W0.5 — double documentation)
+- subjectively evaluating the checklist ("in general ok") instead of algorithmically counting failed items
 
 Rules:
 

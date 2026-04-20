@@ -32,7 +32,7 @@
 | **Review тестов** | ✅ Специализированный test-reviewer agent | Частично (code review) | ❌ Нет | Peer review |
 | **Verification** | ✅ Тест-раннер + статус в state | ❌ | ❌ «Надеюсь что работает» | CI/CD pipeline |
 | **Handoff between sessions** | ✅ Через state file | ❌ | ❌ | Ручной |
-| **Multi-agent pipeline** | ✅ 5 специализированных агентов | ✅ 6 агентов (но без тестов) | ❌ Один AI | Команда людей |
+| **Multi-agent pipeline** | ✅ 6+ специализированных агентов | ✅ 6 агентов (но без тестов) | ❌ Один AI | Команда людей |
 | **Fallback commands** | ✅ `/audit-tests`, `/implement-tests` etc. | ✅ | ❌ | N/A |
 | **Machine-readable progress** | ✅ JSON Schema + валидация | ❌ | ❌ | ❌ |
 | **CI/CD integration ready** | ✅ Валидатор state CLI (Phase 3) | ❌ | ❌ | ✅ Традиционные tools |
@@ -171,6 +171,12 @@ test-reviewer проверяет каждый gate. Raw AI не проверяе
 | | go-testing.md |
 
 superpowers имеет только frontend patterns. GigaTest — все стеки.
+
+### 3.6 Convention Discovery
+
+> Автоматическое обнаружение конвенций тестирования из проекта.
+
+GigaTest умеет сканировать существующие тесты, извлекать закономерности (naming, mocking, structure, forbidden patterns) и создавать convention overlay. После human-in-the-loop review все test-agенты пишут тесты в стиле вашей команды. Ни superpowers, ни Raw AI этого не делают.
 
 ---
 

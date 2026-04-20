@@ -129,7 +129,8 @@
         "target": "Header",
         "artifact": "src/components/layout/__tests__/Header.test.tsx",
         "quality_gate": [
-          "Snapshot renders correctly"
+          "Snapshot renders correctly with at least one behavioral assertion",
+          "Component has no user interactions to test (static header)"
         ],
         "created_at": "2026-04-16T10:00:00Z",
         "started_at": null,
