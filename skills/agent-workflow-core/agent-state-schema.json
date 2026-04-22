@@ -153,7 +153,7 @@
               },
               "quality_gate": {
                 "type": "array",
-                "items": {"type": "string"},
+                "items": { "$ref": "#/definitions/quality_gate_item" },
                 "description": "Список требований к качеству теста, которые необходимо выполнить"
               },
               "artifact": {
@@ -280,6 +280,41 @@
               "result": {"type": "string", "enum": ["success", "failure"]}
             }
           }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "quality_gate_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "level", "satisfied"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Идентификатор чеклист-пункта (Q1–Q9 + stack-specific, e.g. Q10)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Краткое описание критерия качества"
+        },
+        "level": {
+          "type": "string",
+          "enum": ["required", "recommended", "optional"],
+          "description": "Уровень критичности: required блокирует full, recommended — warning only"
+        },
+        "satisfied": {
+          "type": "boolean",
+          "description": "true если критерий выполнен, false если нет"
+        },
+        "note": {
+          "type": "string",
+          "description": "Опциональное пояснение (например, почему не satisfied)"
+        },
+        "estimation_method": {
+          "type": "string",
+          "enum": ["llm", "instrumented"],
+          "description": "Метод оценки (для Q9 branch coverage: llm = LLM-estimated)"
         }
       }
     }
