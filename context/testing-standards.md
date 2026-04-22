@@ -54,24 +54,86 @@
 
 ---
 
-## 3. Quality Checklist (обязательный для full coverage)
+## 3. Quality Checklist — Three-Level System (FG-2)
 
 Применяется к **каждому** тестовому файлу независимо от стека.
 
 > **Source of truth:** Этот раздел — единый источник базового чеклиста.
 > Skills и agents ссылаются на него, добавляя только delta (уникальные для своей роли вопросы).
+>
+> **Важно:** Не все пункты одинаково блокирующие. Система использует три уровня строгости.
 
-- [ ] Тест не обращается к внутренностям реализации (приватные поля, состояние, внутренние вызовы)
-- [ ] Ассерты проверяют наблюдаемое поведение (ответ, статус, результат)
-- [ ] Один тест — один сценарий (нет множественных assert на разные вещи)
-- [ ] Название теста описывает поведение, а не действие (`should_return_404_when_user_not_found`, а не `test_get_user`)
-- [ ] Нет излишних моков (замокано только то, что необходимо)
-- [ ] Happy path покрыт
-- [ ] Error handling/исключения покрыты (хотя бы базовый негативный сценарий)
-- [ ] Асинхронное поведение обрабатывается корректно (`await`, `waitFor`, `timeout`) — **если применимо**
-- [ ] Для тестов с ветвлениями: покрыты основные `if/else` ветки
+### 3.1 Level 1: REQUIRED (блокирующие для `full`)
 
-> **Note:** Этот чеклист — **обязательный минимум для статуса `full`**. Если хотя бы один пункт чеклиста не выполнен → статус `partial`. Это не «пол» (minimum acceptable), а «потолок» (must pass all for full).
+Эти критерии — security/correctness critical. Failure → `coverage_status = "partial"`.
+
+| ID | Критерий | Пример violation |
+|----|----------|-----------------|
+| **Q1** | Тест не обращается к внутренностям реализации (приватные поля, состояние, внутренние вызовы) | `wrapper.instance().privateMethod()` |
+| **Q2** | Ассерты проверяют наблюдаемое поведение (ответ, статус, результат) | Ассерты только на моки, без проверки ответа |
+| **Q3** | Один тест — один сценарий (нет множественных assert на разные вещи) | Один тест проверяет и happy path, и error |
+| **Q5** | Нет излишних моков (замокано только то, что необходимо) | Мок внутренней функции которую тестируем |
+| **Q6** | Happy path покрыт | Нет теста на успешный сценарий |
+
+### 3.2 Level 2: RECOMMENDED (warning, НЕ блокируют `full`)
+
+Эти критерии — качество/читаемость. Failure → warning в findings. `coverage_status` может остаться `full` (с пометкой).
+
+| ID | Критерий | Контекстная зависимость |
+|----|----------|------------------------|
+| **Q4** | Название теста описывает поведение, а не действие (`should_return_404_when_user_not_found`, а не `test_get_user`) | Всегда recommended |
+| **Q7** | Error handling/исключения покрыты | **REST/HTTP контроллеры** → `required`<br>**Сервисы/business logic** → `recommended`<br>**Pure logic/util** → `optional` |
+| **Q9** | Branch coverage (if/else ветки) | Всегда recommended (LLM-оценка, не инструментальная метрика) |
+
+### 3.3 Level 3: OPTIONAL (informational)
+
+| ID | Критерий | Условие |
+|----|----------|---------|
+| **Q8** | Асинхронное поведение обрабатывается корректно (`await`, `waitFor`, `timeout`) | **REQUIRED** только для async/конкурентного кода. ИНАЧЕ — `N/A` |
+
+### 3.4 Scoring Logic
+
+```
+quality_gate scoring:
+  required_items = filter(Q-items, level="required")
+  recommended_items = filter(Q-items, level="recommended")
+
+  failed_required = count(required_items where satisfied=false)
+  failed_recommended = count(recommended_items where satisfied=false)
+
+  IF failed_required > 0:
+    coverage_status = "partial"
+  ELSE IF failed_required == 0:
+    coverage_status = "full"
+    IF failed_recommended > 0:
+      // Не снижает статус, но добавляет warnings
+      findings += "warning: {failed_recommended} recommended items not satisfied"
+```
+
+### 3.5 Quality Gate JSON Structure
+
+Структура quality_gate в `agent-state.json` определяется схемой: `skills/agent-workflow-core/agent-state-schema.json#/definitions/quality_gate_item`.
+
+Каждый Q-item содержит:
+- `id` (required) — идентификатор чеклист-пункта (Q1–Q9 + stack-specific)
+- `level` (required) — уровень критичности: `required`, `recommended`, `optional`
+- `satisfied` (required) — `true` если критерий выполнен
+- `name` (optional) — краткое описание
+- `note` (optional) — пояснение почему не satisfied
+- `estimation_method` (optional) — для Q9: `llm` если LLM-estimated
+
+Пример:
+```json
+{
+  "quality_gate": [
+    {"id": "Q1", "name": "No internal state assertions", "level": "required", "satisfied": true},
+    {"id": "Q4", "name": "Test names describe behavior", "level": "recommended", "satisfied": false, "note": "15% tests use implementation-based names"},
+    {"id": "Q9", "name": "Branch coverage", "level": "recommended", "satisfied": false, "estimation_method": "llm", "note": "LLM-estimated, ~60% branches covered"}
+  ]
+}
+```
+
+> **Note:** Уровень (`level`) каждого Q-item определяется правилами из данного раздела И stack-specific overlay (напр. `java-testing.md R4.1` для Q7). Аудитор проверяет overlay ПЕРЕД назначением уровня.
 
 ---
 

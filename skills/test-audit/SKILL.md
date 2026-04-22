@@ -21,6 +21,10 @@ Perform a comprehensive analysis of existing tests, identify coverage and qualit
 2. For each test file, identify its target (component, function, controller, service, repository, etc.).
 3. Map testable targets to their coverage status by following the `@./skills/agent-workflow-core/SKILL.md` and the corresponding `context/<stack>-testing.md` overlay.
 
+**Canonical path resolution:**
+- Использовать абсолютный путь к исходному файлу (source file, НЕ тестовому)
+- Нормализовать: убрать `../`, `./`, привести к lowercase (для case-insensitive FS)
+
 ### Phase 2: Quality Analysis
 
 For each test file, evaluate quality using the **mandatory checklist** and the **Coverage Scoring Algorithm** below.
@@ -58,6 +62,27 @@ For each test file, evaluate quality using the **mandatory checklist** and the *
 | Python | Q10: `TestClient`/`pytest.raises` для endpoint'ов и сервисов |
 | Go | Q10: `httptest.NewRecorder` для handlers, `mock.Assert*` для сервисов |
 
+#### 2.2.1 Branch Coverage — LLM Estimation Disclaimer (FG-4)
+
+**RULE:** Branch coverage data from audit are LLM-ESTIMATED, not instrumented.
+
+Все audit output, содержащие branch coverage, ОБЯЗАНЫ включать disclaimer:
+
+```
+[ESTIMATED] Branch coverage is LLM-estimated from code/test analysis.
+             Run JaCoCo (Java), c8 (JS), or coverage tool for precise metrics.
+```
+
+**Audit report summary MUST NOT** представлять branch coverage как точный процент.
+Формат: `Branch coverage: ~45% (LLM-estimated)` — НЕ `Branch coverage: 45%`
+
+**Q9 quality gate item** — добавить поле `"estimation_method": "llm"`:
+```json
+{"id": "Q9", "name": "Branch coverage", "level": "recommended",
+ "satisfied": false, "estimation_method": "llm",
+ "note": "LLM-estimated. Run JaCoCo/c8 for precise coverage."}
+```
+
 #### 2.3 Apply Downgrade Rules (BEFORE scoring)
 
 Агент **обязан** применить downgrade **до** evaluation Coverage Scoring Algorithm. Downgrade overrides final status:
@@ -74,40 +99,80 @@ For each test file, evaluate quality using the **mandatory checklist** and the *
 
 **Правило:** Downgrade применяется **автоматически** при обнаружении conditions. Агент не может его переопределить субъективной оценкой.
 
-#### 2.4 Coverage Scoring Algorithm
+#### 2.4 Coverage Scoring Algorithm — Strict (FG-1)
 
-Если downgrade не применён на §2.3, агент вычисляет статус алгоритмически:
+Если downgrade не применён на §2.3, агент вычисляет статус алгоритмически.
+
+**CRITICAL INVARIANT:** `coverage_status = "full"` **ДОЛЖНО** означать что ВСЕ required quality gate items имеют `satisfied = true`. Любое нарушение = BUG в генерации agent-state.json.
+
+##### 2.4.1 Quality Gate Structure
+
+Каждый target в `agent-state.json` содержит структурированный `quality_gate`, определяемый схемой: `skills/agent-workflow-core/agent-state-schema.json#/definitions/quality_gate_item`.
+
+Поля:
+- `id` — идентификатор чеклист-пункта (Q1–Q9 + stack-specific)
+- `name` — краткое описание
+- `level` — уровень критичности (`required`, `recommended`, `optional`) — определяется по правилам из `context/testing-standards.md §3` и stack overlay
+- `satisfied` — `true` если критерий выполнен, `false` если нет
+- `note` — опциональное пояснение (например, почему не satisfied)
+- `estimation_method` — для Q9: `llm` если LLM-estimated (FG-4)
+
+##### 2.4.2 Scoring Algorithm
 
 ```
-Input: checklist_result = {passed_count, failed_count, failed_items[]}
-       overlay_r4.1 = {criteria_met_count, criteria_total}  (если применим)
+Input: quality_gate = [ {id, level, satisfied, note} ]
 
 Algorithm:
-1. failed_count == 0 AND (overlay_r4.1 отсутствует OR criteria_met_count == criteria_total)
-   → return status="full"
+  required_items = filter(quality_gate, level="required")
+  failed_required = count(required_items where satisfied=false)
 
-2. failed_count >= 1 OR (overlay_r4.1 присутствует AND criteria_met_count < criteria_total)
-   → return status="partial"
+  IF failed_required == 0:
+    coverage_status = "full"
+  ELSE IF failed_required > 0:
+    coverage_status = "partial"
 
-3. Fallback: status="partial"
+  // NOTE: coverage_status="invalid" или "missing" назначаются ДО этого алгоритма
+  // (downgrade rules §2.3 или отсутствие тестов)
+
+  ⚠️ INVARIANT: coverage_status = "full" IMPLIES ∀ qg ∈ required_items: qg.satisfied = true
+  Это инвариант. Любое нарушение = BUG.
 ```
+
+##### 2.4.3 Validation Rule
+
+Перед сохранением `agent-state.json` аудитор ОБЯЗАН выполнить валидацию:
+
+```
+VALIDATE(target):
+  IF target.coverage_status == "full":
+    failed = filter(target.quality_gate, level="required" AND satisfied=false)
+    IF failed is not empty:
+      // AUTO-CORRECT: переквалифицировать в partial
+      target.coverage_status = "partial"
+      log("[AUDIT] scoring correction: '{target.id}' had full with {length(failed)} failed required → corrected to partial")
+```
+
+##### 2.4.4 Output Format
 
 **Результат всегда сопровождается:**
 ```yaml
 [AUDIT SCORE] <file_path>
-  passed: <N>
-  failed: <M>
-  failed_items: [<item1>, <item2>]
-  overlay_full_criteria: <X>/<Y> met
+  quality_gate:
+    - {id: Q1, level: required, satisfied: true}
+    - {id: Q4, level: recommended, satisfied: false, note: "..."}
+    - {id: Q7, level: required, satisfied: false, note: "..."}
+  required_total: <N>
+  failed_required: <M>
   → coverage_status: <full | partial>
+[AUDIT] scoring applied: target=<file_path>, failed_required=<M> → status=<full|partial>
 ```
 
 #### Coverage Status Reference
 
 | Status | Определение |
 |--------|-------------|
-| **full** | Checklist: 0 failed items. Overlay R4.1: все criteria met. Downgrade rules: none triggered. |
-| **partial** | Checklist: 1+ failed items. Testable gaps exist. `missing_requirements` must be populated. |
+| **full** | Quality gate: 0 failed `required` items. Overlay R4.1: все criteria met. Downgrade rules: none triggered. Recommended items may have failures (warnings only). |
+| **partial** | Quality gate: 1+ failed `required` items. Testable gaps exist. `missing_requirements` must be populated. |
 | **invalid** | Tests exist but are meaningless (snapshot-only, no assertions, or fail on execution). |
 | **missing** | No test file exists for this target. |
 
@@ -177,6 +242,52 @@ Final report must include:
 [AUDIT] plan_location: .gigacode/plans/tests-audit-YYYY-MM-DD/
 ```
 
+### Phase 5.1: Coverage Summary (FG-5)
+
+Audit report ОБЯЗАН содержать двухуровневый quality scoring:
+
+```markdown
+## Coverage Summary
+
+| Metric | Value |
+|--------|-------|
+| Source files | <total_targets> |
+| Files with tests | <targets_with_tests> |
+| Full coverage (strict*) | <full_strict_count> (<percent>%) |
+| Partial coverage | <partial_count> (<percent>%) |
+| Missing | <missing_count> |
+
+> * Full (strict) = all REQUIRED quality gates satisfied.
+>   Recommended items failures (Q4, Q7-service, Q9) generate warnings but do not reduce status.
+>   Strict Quality Score: <strict_percent>%
+>   Full Quality Score: <full_percent>%
+```
+
+**Формулы:**
+```
+strict_quality_score = (targets_with_all_required_satisfied / total_targets_with_tests) × 100
+full_quality_score = (targets_with_all_items_satisfied / total_targets_with_tests) × 100
+```
+
+### Phase 5.2: Quality Warnings (FG-5)
+
+Audit report ОБЯЗАН содержать секцию warnings для recommended items failures:
+
+```markdown
+## Quality Warnings (non-blocking)
+
+| Warning | Affected files | Description |
+|---------|---------------|-------------|
+| Q4: Test naming | <N> files | <X>% use implementation-based names |
+| Q7: Error handling (service) | <N> files | Services delegate error handling |
+| Q9: Branch coverage (estimated) | <N> files | LLM-estimated branch gaps |
+```
+
+**Правила:**
+- Группировать warnings по Q-item id
+- Показывать количество затронутых файлов
+- Добавлять краткое описание причины
+
 And a `test-plan.md` with grouped tasks by priority, ready for iterative execution via `test-implementation`.
 
 ## Exit Conditions
@@ -190,8 +301,12 @@ And a `test-plan.md` with grouped tasks by priority, ready for iterative executi
 - [ ] `memory.history` содержит минимум записи `started` и `completed` (audit stages)
 - [ ] Audit summary output содержит `[AUDIT] total/targets/full/partial/invalid/missing`
 - [ ] Для каждого audited файла выведен `[AUDIT CHECKLIST]` с ✓/✗ отметками по всем пунктам (Phase 2 §2.2)
-- [ ] Для каждого partial/invalid файла выведен `[AUDIT SCORE]` с failed_items (Phase 2 §2.4)
+- [ ] Для каждого partial/invalid файла выведен `[AUDIT SCORE]` с quality_gate структурой (Phase 2 §2.4)
 - [ ] Downgrade rules применены где применимы (Phase 2 §2.3)
+- [ ] Validation rule §2.4.3 выполнена: нет `coverage_status: "full"` с failed required items
+- [ ] Каждый quality_gate item имеет поля: `id`, `level`, `satisfied` (и опционально `name`, `note`)
+- [ ] Audit summary содержит Coverage Summary с strict_quality_score и full_quality_score
+- [ ] Audit summary содержит Quality Warnings секцию с распределением recommended failures по типам
 
 ## Forbidden Patterns
 
@@ -201,4 +316,6 @@ And a `test-plan.md` with grouped tasks by priority, ready for iterative executi
 | Присвоение `partial` только по наличию тест-файла | Файл существует ≠ качество, нужна проверка по quality checklist |
 | Пропуск `missing_requirements` | Пользователь не узнает что именно нужно добавить |
 | Создание `agent-state.json` без `quality_gate` для каждой задачи | Plan.items без quality_gate бесполезен для имплементации |
+| `coverage_status: "full"` при наличии failed required quality gate items | Нарушение инварианта FG-1 — приводит к inconsistency (баг) |
+| Quality gate item без поля `level` | Невозможно применить strict scoring algorithm |
 | Абсолютные пути в артефактах | Не portable, ломается при перемещении проекта |

@@ -26,6 +26,27 @@ that is regenerated from `agent-state.json` after every state change.
 | 🚫 Недействительное | {{test_plan.audit_summary.invalid_coverage}} |
 | ❌ Отсутствует | {{test_plan.audit_summary.no_coverage}} |
 
+{{#if test_plan.quality_score_summary}}
+## 📈 Quality Score Summary
+
+- Strict Quality Score: **{{test_plan.quality_score_summary.strict_percent}}%** (required items only)
+- Full Quality Score: **{{test_plan.quality_score_summary.full_percent}}%** (all items including recommended)
+- Files with warnings: **{{test_plan.quality_score_summary.files_with_warnings}}** (have recommended items failures but may still be full)
+{{/if}}
+
+{{#if test_plan.quality_warnings}}
+## ⚠️ Quality Warnings (non-blocking)
+
+| Warning | Affected files | Description |
+|---------|---------------|-------------|
+{{#each test_plan.quality_warnings}}
+| {{id}}: {{name}} | {{file_count}} files | {{description}} |
+{{/each}}
+{{/if}}
+
+> ⚠️ Branch coverage percentages are **LLM-estimates**, not instrumented measurements.
+> Run project coverage tools (JaCoCo, c8, etc.) for precise data.
+
 ## 📋 Сводка задач
 
 | Приоритет | pending | in_progress | done | blocked |

@@ -54,30 +54,8 @@
   ],
   "definitions": {
     "quality_gate_item": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["type", "description"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["interaction", "async", "states", "edge_cases", "error_handling", "branch_coverage", "naming", "no_duplication", "mocking_discipline", "custom"],
-          "description": "Category of quality requirement"
-        },
-        "description": {
-          "type": "string",
-          "description": "Human-readable description (e.g. 'Must test loading/error/success states')"
-        },
-        "priority": {
-          "type": "string",
-          "enum": ["required", "recommended"],
-          "default": "required",
-          "description": "Whether this gate must pass or is a nice-to-have"
-        },
-        "satisfied": {
-          "type": "boolean",
-          "description": "Whether this gate has been verified as satisfied. Set by test-implementation or test-review."
-        }
-      }
+      "$ref": "./agent-state-schema.json#/definitions/quality_gate_item",
+      "description": "Re-export from base schema for convenience"
     }
   }
 }
