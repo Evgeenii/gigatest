@@ -81,7 +81,7 @@ GigaTest построен по принципу **skills-first**: навыки (
 | **Convention skills** | Обнаружение и ревью конвенций проекта | `skills/convention-{discovery,review}/SKILL.md` |
 | **Agent profiles** | Ролевой контекст: failure modes, выходной формат, правила поведения | `agents/test-{auditor,implementer,reviewer,verifier,strategist,convention-discoverer}.md` |
 | **Core skill** | Итеративный цикл, двойная документация, JSON Schema, W11 conventions | `skills/agent-workflow-core/SKILL.md` + схемы |
-| **Context overlays** | Стек-специфичные стратегии тестирования | `context/{react,java,js-ts,python,go}-testing.md` |
+| **Context overlays** | Стек-специфичные стратегии тестирования | `context/{react,java}-testing.md` |
 
 > **Вы не работаете с агентами напрямую.** Вы описываете задачу, router выбирает
 > подходящий skill, skill ведёт работу — агент предоставляется автоматически.
@@ -276,13 +276,9 @@ GigaTest умеет **автоматически обнаруживать** ко
 |---------|-------|--------------|
 | `react-testing.md` | React проект | RTL, Jest/Vitest, hooks, component classification |
 | `java-testing.md` | Java/Spring Boot | JUnit 5, Mockito, @WebMvcTest, @DataJpaTest |
-| `js-ts-testing.md` | Node/TS | Express, NestJS, Supertest, сервисы |
-| `python-testing.md` | Python | FastAPI, Django, Flask, pytest, pytest-mock, SQLAlchemy |
-| `go-testing.md` | Go | net/http, testify, httptest, gomock |
 | `testing-standards.md` | Всегда (base) | Behavior-first, AAA pattern, forbidden patterns |
 
-Skill автоматически определяет стек по ключевым файлам (`package.json`, `pom.xml`,
-`go.mod`, `requirements.txt` и т.д.) и подключает нужный оверлей.
+Skill автоматически определяет стек по ключевым файлам (`package.json`, `pom.xml`, `build.gradle`) и подключает нужный оверлей.
 Можно указать явно: «используй react-оверлей».
 
 ---
@@ -481,10 +477,7 @@ extensions/gigatest-0.1.0/
 ├── context/                         # Стандарты + оверлеи (подключаются skills)
 │   ├── testing-standards.md         # Base (всегда)
 │   ├── react-testing.md
-│   ├── java-testing.md
-│   ├── js-ts-testing.md
-│   ├── python-testing.md
-│   └── go-testing.md
+│   └── java-testing.md
 │
 ├── plans/                           # Примеры артефактов
 │   ├── tests-audit-example/
@@ -601,12 +594,11 @@ Skill подключит его автоматически при определ
 
 **Q: Какой стек поддерживается?**
 
-A: React, Java/Spring Boot, JS/TS (Node.js), Python (FastAPI/Django/Flask), Go.
-Если стек не определён — используется `testing-standards.md` как fallback.
+A: React и Java/Spring Boot. Если стек не определён — используется `testing-standards.md` как fallback.
 
 **Q: GigaTest production-ready?**
 
-A: Да. Readiness Score: 4.6/5. Все 9 skills, 6 агентов, 5 оверлеев, CLI-утилиты, convention discovery — работают.
+A: Да. Readiness Score: 4.6/5. Все 9 skills, 6 агентов, 2 стековых оверлея, CLI-утилиты, convention discovery — работают.
 Подробности: [strategy/READINESS-MATRIX.md](strategy/READINESS-MATRIX.md).
 
 **Q: Что такое Convention Discovery?**

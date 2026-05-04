@@ -14,10 +14,8 @@ Perform a comprehensive analysis of existing tests, identify coverage and qualit
 ### Phase 1: Discovery
 
 1. Scan the project for all test files:
-   - React/JS/TS: `*.test.*`, `*.spec.*`, `__tests__/`
+   - React: `*.test.*`, `*.spec.*`, `__tests__/`
    - Java: `*Test.java`, `*IntegrationTest.java`
-   - Python: `test_*.py`, `*_test.py`
-   - Go: `*_test.go`
 2. For each test file, identify its target (component, function, controller, service, repository, etc.).
 3. Map testable targets to their coverage status by following the `@./skills/agent-workflow-core/SKILL.md` and the corresponding `context/<stack>-testing.md` overlay.
 
@@ -58,9 +56,6 @@ For each test file, evaluate quality using the **mandatory checklist** and the *
 |------|----------------------|
 | React | Q10: `userEvent`/`fireEvent` для компонентов с кнопками/инпутами |
 | Java | Q10: `@WebMvcTest`/`@MockBean` для контроллеров, `verify()` для моков |
-| JS/TS | Q10: HTTP integration test (supertest/TestClient) для endpoints |
-| Python | Q10: `TestClient`/`pytest.raises` для endpoint'ов и сервисов |
-| Go | Q10: `httptest.NewRecorder` для handlers, `mock.Assert*` для сервисов |
 
 #### 2.2.1 Branch Coverage — LLM Estimation Disclaimer (FG-4)
 
@@ -90,10 +85,10 @@ For each test file, evaluate quality using the **mandatory checklist** and the *
 | Condition | Downgrade To |
 |-----------|--------------|
 | Только `toMatchSnapshot()` / `assert_eq!(output, snapshot)` без behavioral assertions | `invalid` |
-| Тестовый файл существует, но содержит 0 test blocks (`it`/`test`/`@Test`/`def test_`/`func Test`) | `invalid` |
+| Тестовый файл существует, но содержит 0 test blocks (`it`/`test`/`@Test`) | `invalid` |
 | Тесты fail on execution | `invalid` |
 | Для UI-компонента (forms, buttons, views): нет user interaction test (`userEvent`, `fireEvent`, эквивалент) | `partial` |
-| Для HTTP endpoint/handler: нет integration test (supertest, TestClient, httptest, эквивалент) | `partial` |
+| Для HTTP endpoint/handler: нет integration test (напр. @WebMvcTest, MockMvc, rest-assured) | `partial` |
 | Для async операций (API calls, DB queries, timers): нет async/wait check (`await findBy*`, `waitFor`, `assertThrows`, эквивалент) | `partial` |
 | Количество test blocks < R4.1 minimum для данного типа цели (напр. `< 3 it` для сервиса с ветвлениями) | `partial` |
 
@@ -182,7 +177,7 @@ Classify each gap by priority:
 
 | Priority | Criteria | Примеры |
 |----------|----------|---------|
-| **critical** | Entry points (App/Main, public API, key controllers/routes/handlers) with no tests or invalid tests | React `App.tsx` без тестов; Java `UserController` без тестов; Python `/api/users` без тестов |
+| **critical** | Entry points (App/Main, public API, key controllers/handlers) with no tests or invalid tests | React `App.tsx` без тестов; Java `UserController` без тестов |
 | **high** | Components with user interactions (forms, buttons, views) OR critical services with `partial` coverage | Форма авторизации; `UserService` с бизнес-логикой |
 | **medium** | Utilities, selectors, hooks, helpers, non-critical services with `partial` coverage | `validateEmail`; мапперы; хуки данных |
 | **low** | Static components, pure helpers, simple getters with no complex logic | Конфигурационные файлы; UI-элементы без логики |
@@ -217,8 +212,8 @@ Output the audit summary in the standard format:
 - Do not assign `partial` status based solely on test file existence; evaluate quality.
 - Do not skip the quality checklist for any target with tests.
 - Do not skip `missing_requirements` — the user must know exactly what needs to be added.
+- For targets with HTTP endpoint exposure, if no integration test (напр. `@WebMvcTest`, `MockMvc`) is present → status is `partial`. **(Backend-проект)**
 - For targets with UI interactions (forms, buttons, views), if no user interaction test (`userEvent`, `fireEvent`) is present → status is `partial`. **(React-проект)**
-- For targets with HTTP endpoint exposure, if no integration test (`supertest`, `TestClient`, `httptest`) is present → status is `partial`. **(Backend-проект)**
 - For targets with async operations (API calls, DB queries, timers), if no async/wait behavior check → status is `partial`.
 - Mark blocked items (e.g., component can't be resolved) and continue; do not halt execution.
 - Output the final report grouped by priority: critical → high → medium → low.

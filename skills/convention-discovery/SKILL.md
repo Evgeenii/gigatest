@@ -17,13 +17,12 @@ Scan a project's existing codebase to detect testing conventions (naming, struct
 
 Найти все тестовые файлы и проанализировать:
 
-- **Пути**: `*.test.*`, `*.spec.*`, `__tests__/`, `*Test.java`, `test_*.py`, `*_test.go`
+- **Пути**: `*.test.*`, `*.spec.*`, `__tests__/`, `*Test.java`
 - **Naming patterns**: Как именуются `describe`/`context`/`it`/`test` блоки
   - `describe('ComponentName')` vs `describe('component-name')` vs `describe('component_name')`
   - `it('should do X')` vs `it('does X')` vs `it('X')`
   - `@DisplayName("...")` vs `testMethodName()` (Java)
-  - `def test_function_name()` vs `TestFunctionName()` (Go/Python)
-- **File organization**: Тесты рядом с исходниками (`src/foo.ts` + `src/foo.test.ts`) или отдельно (`tests/foo_test.py`)
+- **File organization**: Тесты рядом с исходниками (`src/foo.ts` + `src/foo.test.ts`) или отдельно (`test/`)
 - **AAA usage**: Есть ли явные `Arrange`/`Act`/`Assert` комментарии, `given/when/then` паттерн
 
 ### 1.2 Config Files
@@ -36,9 +35,6 @@ Scan a project's existing codebase to detect testing conventions (naming, struct
 | `vitest.config.*` | include, exclude, environment, globals |
 | `pom.xml` (test scope) | surefire/failsafe plugins, test dependencies |
 | `build.gradle` | testImplementation, testRuntimeOnly, test tasks |
-| `pyproject.toml` | test dependencies, pytest config |
-| `pytest.ini` / `conftest.py` | fixtures, markers, hooks |
-| `{package}_test.go` | build tags, package naming |
 | `.prettierrc*` / `.eslintrc*` | naming plugins, test-related rules |
 
 ### 1.3 Team Docs
@@ -55,10 +51,10 @@ Scan a project's existing codebase to detect testing conventions (naming, struct
 
 Анализировать исходный код на предмет:
 
-- **Error handling**: `try/catch` в тестах, `assertThrows`, `expect().toThrow()`, `pytest.raises`
-- **Mocking style**: `jest.mock()`, `@MockBean`, `unittest.mock.patch`, `gomock` / `testify`
+- **Error handling**: `try/catch` в тестах, `assertThrows`, `expect().toThrow()`
+- **Mocking style**: `jest.mock()`, `@MockBean`
 - **Factory/fixtures**: Как создаются тестовые данные — factory functions, builders, fixtures files
-- **Test helpers**: Shared utilities в `testUtils/`, `test/helpers/`, `conftest.py`, `internal/testutil/`
+- **Test helpers**: Shared utilities в `testUtils/`, `test/helpers/`
 
 ### 1.5 Forbidden Patterns Detection
 

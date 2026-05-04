@@ -259,12 +259,9 @@ ID задач: `T1/T2/T3` (последовательные) | `UI-001/LOGIC-001
 | Распознавание файла | Stack | Overlay |
 |---------------------|-------|---------|
 | `package.json` + react | React | react-testing.md |
-| `package.json` без react | JS/TS | js-ts-testing.md |
-| `go.mod` / `*.go` | Go | go-testing.md |
-| `requirements.txt` / `pyproject.toml` / `poetry.lock` | Python | python-testing.md |
 | `pom.xml` / `build.gradle` / `*.java` | Java | java-testing.md |
-| `Cargo.toml` / `*.rs` | Rust | (future) |
-| `Gemfile` / `*.rb` | Ruby | (future) |
+
+**Fallback:** Ни один из файлов не найден → `testing-standards.md` (базовые стандарты).
 
 Результат: `[AGENT] knowledge += "Detected stack: <stack>"`
 

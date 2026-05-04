@@ -1,0 +1,129 @@
+# backlog.yaml — Machine-readable backlog GigaTest
+# Version: 6.0 | Date: 2026-05-04T00:00:00Z
+# Source of truth for task statuses.
+# Human-readable version: SPEC.md, ARCHITECTURE.md
+
+meta:
+  product: GigaTest
+  version: 0.2.0
+  current_phase: 7
+  phases_completed: [0, 1, 2, 3, 4, 5, 6]
+
+phases:
+  - id: phase-0
+    name: Foundation
+    status: done
+    description: Skills-first concept, router skill, using-gigatest
+
+  - id: phase-1
+    name: Workflow Skills
+    status: done
+    description: Audit, implementation, review, verification skills
+
+  - id: phase-2
+    name: Core Engine
+    status: done
+    description: agent-workflow-core, state machine, JSON schemas, W0-W11
+
+  - id: phase-3
+    name: Convention System
+    status: done
+    description: Convention discovery, review, W11 loading protocol
+
+  - id: phase-4
+    name: Stack Overlays
+    status: done
+    description: 5 stack overlays (React, Java, JS/TS, Python, Go) with R1-R9
+
+  - id: phase-5
+    name: Polish
+    status: done
+    description: CLI tools (validate-state.js, generate-report.js), documentation, examples
+
+  - id: phase-6
+    name: Stack Reduction
+    status: done
+    description: Removed Python, Go, JS/TS overlays. Kept React + Java.
+    tasks:
+      - id: T6-1
+        name: Delete Python overlay
+        file: context/python-testing.md
+        action: DELETE
+        status: done
+      - id: T6-2
+        name: Delete Go overlay
+        file: context/go-testing.md
+        action: DELETE
+        status: done
+      - id: T6-3
+        name: Delete JS/TS overlay
+        file: context/js-ts-testing.md
+        action: DELETE
+        status: done
+      - id: T6-4
+        name: Update test-plan-state-schema.json
+        file: skills/agent-workflow-core/test-plan-state-schema.json
+        action: EDIT
+        details: Removed python, go, js-ts from target_stack enum; removed overlays from context_overlay enum
+        status: done
+      - id: T6-5
+        name: Update W10.2 Stack Detection table
+        file: skills/agent-workflow-core/SKILL.md
+        action: EDIT
+        details: Removed Python, Go, JS/TS rows from stack detection table
+        status: done
+      - id: T6-6
+        name: Update testing-standards.md §5 overlay table
+        file: context/testing-standards.md
+        action: EDIT
+        details: Removed Python, Go, JS/TS rows
+        status: done
+      - id: T6-7
+        name: Search and update references
+        action: SEARCH_AND_UPDATE
+        details: Updated test-audit/SKILL.md, agents/*.md, convention-discovery/SKILL.md, README.md, react-testing.md, testing-standards.md for removed stack mentions
+        status: done
+      - id: T6-8
+        name: Update README.md
+        file: README.md
+        action: EDIT
+        details: Removed stack mentions from overlay table, FAQ, directory structure
+        status: done
+
+  - id: phase-7
+    name: Rich Examples
+    status: planned
+    description: Comprehensive plan examples for documentation
+    tasks:
+      - id: T7-1
+        name: Create React audit example
+        action: WRITE_EXAMPLE
+        details: Full agent-state.json + test-plan.md for React project audit
+      - id: T7-2
+        name: Create Java strategy example
+        action: WRITE_EXAMPLE
+        details: Full plan for Java project strategy definition
+      - id: T7-3
+        name: Create convention discovery example
+        action: WRITE_EXAMPLE
+        details: Example project-conventions.json + .md from convention discovery
+
+# Known Issues (not tasks)
+issues:
+  - id: I-1
+    name: convention-discoverer missing from agent.type enum
+    severity: medium
+    status: open
+    details: Schema needs updating for convention work to follow same state machine pattern
+  
+  - id: I-2
+    name: Missing documentation files
+    severity: low
+    status: open
+    details: docs/CONVENTION-DISCOVERY.md, docs/DEMO.md, etc. referenced in README but not present
+
+  - id: I-3
+    name: Plan examples minimal
+    severity: low
+    status: open
+    details: plans/tests-audit-example/ has only README.md, needs full agent-state.json + test-plan.md

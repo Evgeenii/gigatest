@@ -161,10 +161,7 @@ quality_gate scoring:
 | Стек | Файл |
 |------|------|
 | React + RTL | `context/react-testing.md` |
-| JS/TS (Node.js) | `context/js-ts-testing.md` |
 | Java + Spring | `context/java-testing.md` |
-| Python + pytest | `context/python-testing.md` |
-| Go + testing | `context/go-testing.md` |
 
 Каждый overlay содержит:
 - R1: Code Classification
@@ -178,4 +175,4 @@ quality_gate scoring:
 
 ---
 
-*Смежные документы: react-testing.md, js-ts-testing.md, java-testing.md, python-testing.md, go-testing.md*
+*Смежные документы: react-testing.md, java-testing.md*

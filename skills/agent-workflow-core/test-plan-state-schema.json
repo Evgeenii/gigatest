@@ -20,17 +20,17 @@
             "target_stack": {
               "type": "string",
               "description": "Целевой стек проекта",
-              "enum": ["react", "java", "js-ts", "python", "go", "multi-stack"]
+              "enum": ["react", "java", "multi-stack"]
             },
             "test_framework": {
               "type": "string",
               "description": "Используемый тестовый фреймворк",
-              "enum": ["jest", "vitest", "junit", "testng", "pytest", "mocha", "go", "unknown"]
+              "enum": ["jest", "vitest", "junit", "testng", "unknown"]
             },
             "context_overlay": {
               "type": "string",
               "description": "Какой testing overlay используется",
-              "enum": ["react-testing.md", "java-testing.md", "js-ts-testing.md", "python-testing.md", "go-testing.md", ""]
+              "enum": ["react-testing.md", "java-testing.md", ""]
             },
             "coverage_tool": {
               "type": "string",

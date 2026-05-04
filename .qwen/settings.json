@@ -6,7 +6,8 @@
       "Bash(mkdir *)",
       "Bash(node *)",
       "Bash(wc *)",
-      "Bash(cp *)"
+      "Bash(cp *)",
+      "Bash(rm *)"
     ]
   },
   "$version": 3

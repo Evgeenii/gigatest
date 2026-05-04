@@ -162,4 +162,4 @@ coverage и рекомендовать миграцию на React Testing Libra
 
 ---
 
-*Смежные документы: testing-standards.md, js-ts-testing.md*
+*Смежные документы: testing-standards.md, java-testing.md*

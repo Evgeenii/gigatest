@@ -1,5 +1,6 @@
 # Dependency directories
 node_modules/
+proof-of-concept
 
 # GigaTest session artifacts
 .gigacode/
